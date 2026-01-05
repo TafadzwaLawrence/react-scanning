@@ -1,0 +1,183 @@
+@import 'tailwindcss';
+
+/* Custom CSS Variables based on design specs */
+:root {
+  /* Primary Brand Colors */
+  --color-primary: #6366F1;
+  --color-primary-light: #818CF8;
+  --color-primary-dark: #4F46E5;
+  
+  /* Secondary Colors */
+  --color-secondary: #8B5CF6;
+  --color-secondary-light: #A78BFA;
+  --color-secondary-dark: #7C3AED;
+  
+  /* Accent */
+  --color-accent: #F59E0B;
+  
+  /* Status Colors */
+  --color-success: #10B981;
+  --color-success-light: #D1FAE5;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FEF3C7;
+  --color-error: #EF4444;
+  --color-error-light: #FEE2E2;
+  --color-info: #3B82F6;
+  --color-info-light: #DBEAFE;
+  
+  /* Scan Result Colors */
+  --color-valid: #10B981;
+  --color-used: #F97316;
+  --color-invalid: #EF4444;
+  
+  /* Neutrals */
+  --color-background: #F9FAFB;
+  --color-surface: #FFFFFF;
+  --color-border: #E5E7EB;
+  
+  /* Text */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-text-disabled: #9CA3AF;
+  
+  /* Typography */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+  
+  .animate-pulse-success {
+    animation: pulse-success 1s ease-in-out;
+  }
+  
+  .animate-pulse-error {
+    animation: pulse-error 1s ease-in-out;
+  }
+  
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+}
+
+@keyframes pulse-success {
+  0%, 100% { background-color: var(--color-success); }
+  50% { background-color: #34D399; }
+}
+
+@keyframes pulse-error {
+  0%, 100% { background-color: var(--color-error); }
+  50% { background-color: #F87171; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Scanner Overlay Styles */
+.scanner-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scanner-frame {
+  width: 250px;
+  height: 250px;
+  border: 3px solid white;
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Toast Container */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Bottom Navigation Safe Area */
+.pb-safe {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+/* Fix for iOS input zoom */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
