@@ -61,10 +61,15 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   min-height: 100vh;
+  /* Safe area for status bar */
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
   display: flex;
   flex-direction: column;
 }

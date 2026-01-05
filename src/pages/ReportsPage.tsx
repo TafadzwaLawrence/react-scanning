@@ -62,7 +62,7 @@ export const ReportsPage: React.FC = () => {
 
   if (!isOnline) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="min-h-screen bg-gray-900 pb-20">
         <div className="bg-white border-b border-gray-200 p-4">
           <h1 className="text-xl font-bold text-gray-900">Reports</h1>
         </div>
@@ -84,16 +84,17 @@ export const ReportsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-900 pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
+      <div className="bg-gray-800 border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Reports</h1>
+          <h1 className="text-xl font-bold text-white">Reports</h1>
           <Button
             variant="ghost"
             size="sm"
             onClick={loadReport}
             disabled={isLoading}
+            className="text-white"
           >
             <svg className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

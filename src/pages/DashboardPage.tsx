@@ -66,9 +66,9 @@ export const DashboardPage: React.FC = () => {
   // Show setup prompt if no tickets downloaded
   if (totalTickets === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="min-h-screen bg-gray-900 pb-20">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white p-4">
+        <div className="bg-gray-800 text-white p-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">
@@ -115,9 +115,9 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-900 pb-20">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white p-4">
+      <div className="bg-gray-800 text-white p-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold">
