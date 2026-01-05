@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRScanner, ScanResultDisplay, ScanStats, CameraPermission } from '@/components/scanner';
 import { Badge, Button, Card } from '@/components/ui';
@@ -36,15 +36,41 @@ export const ScannerPage: React.FC = () => {
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
 
+  // Audio refs for preloaded sounds
+  const successAudioRef = useRef<HTMLAudioElement | null>(null);
+  const failureAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Preload sounds on mount
+  useEffect(() => {
+    successAudioRef.current = new Audio('/sounds/success.mp3');
+    failureAudioRef.current = new Audio('/sounds/failure.mp3');
+    
+    // Preload the audio files
+    successAudioRef.current.load();
+    failureAudioRef.current.load();
+
+    return () => {
+      successAudioRef.current = null;
+      failureAudioRef.current = null;
+    };
+  }, []);
+
   // Play sound
   const playSound = useCallback((type: 'success' | 'failure') => {
     try {
-      const audio = new Audio(
-        type === 'success' ? '/sounds/success.mp3' : '/sounds/failure.mp3'
-      );
-      audio.play().catch(() => {});
-    } catch {
-      // Ignore sound errors
+      const audio = type === 'success' ? successAudioRef.current : failureAudioRef.current;
+      if (audio) {
+        audio.currentTime = 0; // Reset to start
+        audio.volume = 1.0;
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => {
+            console.log('Audio play failed:', err);
+          });
+        }
+      }
+    } catch (err) {
+      console.log('Sound error:', err);
     }
   }, []);
 
