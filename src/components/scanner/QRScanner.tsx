@@ -31,9 +31,17 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hasFlash, setHasFlash] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const lastScannedRef = useRef<string>('');
   const lastScannedTimeRef = useRef<number>(0);
   const cooldownMs = 3000;
+
+  // Vibrate on scan
+  const vibrateOnScan = useCallback(() => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50); // Short vibration when QR is detected
+    }
+  }, []);
 
   const handleScan = useCallback(
     (decodedText: string) => {
@@ -46,11 +54,18 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         return;
       }
 
+      // Visual and haptic feedback
+      setIsScanning(true);
+      vibrateOnScan();
+      
+      // Reset visual feedback after short delay
+      setTimeout(() => setIsScanning(false), 300);
+
       lastScannedRef.current = decodedText;
       lastScannedTimeRef.current = now;
       onScan(decodedText);
     },
-    [onScan]
+    [onScan, vibrateOnScan]
   );
 
   useEffect(() => {
@@ -172,6 +187,41 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         style={{ minHeight: '350px' }}
       />
 
+      {/* Scan focus overlay */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+        <div 
+          className={`
+            w-64 h-64 border-2 rounded-lg transition-all duration-200
+            ${isScanning 
+              ? 'border-green-500 bg-green-500/20 scale-95' 
+              : 'border-white/50'
+            }
+          `}
+        >
+          {/* Corner markers */}
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-lg" />
+          <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-lg" />
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-lg" />
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg" />
+          
+          {/* Scanning line animation */}
+          {!isScanning && (
+            <div className="absolute inset-x-2 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-primary-500 to-transparent animate-pulse" />
+          )}
+          
+          {/* Scan success indicator */}
+          {isScanning && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center animate-ping">
+                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Loading indicator */}
       {isStarting && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-xl">
@@ -181,6 +231,13 @@ export const QRScanner: React.FC<QRScannerProps> = ({
           </div>
         </div>
       )}
+
+      {/* Scan instruction */}
+      <div className="absolute top-4 left-0 right-0 text-center">
+        <p className="text-white/80 text-sm bg-black/40 inline-block px-3 py-1 rounded-full">
+          Position QR code in frame
+        </p>
+      </div>
 
       {/* Controls */}
       <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
