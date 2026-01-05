@@ -34,7 +34,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const lastScannedRef = useRef<string>('');
   const lastScannedTimeRef = useRef<number>(0);
-  const cooldownMs = 3000;
+  const cooldownMs = 1500; // Reduced for faster queue processing
 
   // Vibrate on scan
   const vibrateOnScan = useCallback(() => {
@@ -96,7 +96,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         await html5QrCode.start(
           { facingMode: 'environment' },
           {
-            fps: 15,
+            fps: 30, // Higher FPS for faster detection
             qrbox: { width: qrboxSize, height: qrboxSize },
             aspectRatio: 1,
             disableFlip: false,

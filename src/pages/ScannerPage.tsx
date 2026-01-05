@@ -93,7 +93,7 @@ export const ScannerPage: React.FC = () => {
       let message = '';
       let ticket: ScanResult['ticket'];
 
-      // Pause scanning during processing
+      // Pause scanning immediately
       setIsScanning(false);
 
       try {
@@ -114,12 +114,17 @@ export const ScannerPage: React.FC = () => {
               admittence: (response as any).admittence,
               number: (response as any).number,
             };
+            // Sound & vibrate FIRST before showing result
             playSound('success');
             vibrate([100]);
 
-            // Mark as scanned locally
-            await db.markAsScanned(qrCode, deviceId);
+            // Mark as scanned locally (don't await - do in background)
+            db.markAsScanned(qrCode, deviceId).catch(console.error);
           } else if (response.status === 403) {
+            // Sound FIRST for faster feedback
+            playSound('failure');
+            vibrate([100, 50, 100]);
+            
             if ('scanned_at' in response) {
               resultType = 'used';
               message = `Scanned at ${response.scanned_at}`;
@@ -135,19 +140,18 @@ export const ScannerPage: React.FC = () => {
               resultType = 'invalid';
               message = (response as any).message || 'Invalid ticket';
             }
+          } else if (response.status === 404) {
+            // Sound FIRST
             playSound('failure');
             vibrate([100, 50, 100]);
-          } else if (response.status === 404) {
             resultType = 'invalid';
             message = 'Ticket not found';
+          } else {
+            // Sound FIRST
             playSound('failure');
             vibrate([100, 50, 100]);
-          } else {
-            // Handle any other status codes
             resultType = 'error';
             message = (response as any).message || 'Unknown verification error';
-            playSound('failure');
-            vibrate([100, 50, 100]);
           }
         } else {
           // Offline verification
@@ -155,6 +159,9 @@ export const ScannerPage: React.FC = () => {
 
           if (localTicket) {
             if (localTicket.log_count > 0) {
+              // Sound FIRST
+              playSound('failure');
+              vibrate([100, 50, 100]);
               resultType = 'used';
               message = 'Already scanned (offline)';
               ticket = {
@@ -162,14 +169,16 @@ export const ScannerPage: React.FC = () => {
                 admittence: localTicket.ticket_admittence,
                 number: localTicket.ticket_number,
               };
+            } else if (!selectedTicketTypes.includes(localTicket.ticket_type)) {
+              // Sound FIRST
               playSound('failure');
               vibrate([100, 50, 100]);
-            } else if (!selectedTicketTypes.includes(localTicket.ticket_type)) {
               resultType = 'wrong-type';
               message = `Ticket type: ${localTicket.ticket_type}`;
-              playSound('failure');
-              vibrate([100, 50, 100]);
             } else {
+              // Sound FIRST
+              playSound('success');
+              vibrate([100]);
               resultType = 'valid';
               message = 'Validated offline - will sync later';
               ticket = {
@@ -177,11 +186,9 @@ export const ScannerPage: React.FC = () => {
                 admittence: localTicket.ticket_admittence,
                 number: localTicket.ticket_number,
               };
-              playSound('success');
-              vibrate([100]);
 
-              // Mark as scanned locally and queue for sync
-              await db.markAsScanned(qrCode, deviceId);
+              // Mark as scanned locally and queue for sync (background)
+              db.markAsScanned(qrCode, deviceId).catch(console.error);
               addPendingScan({
                 qrCode,
                 deviceId,
@@ -189,13 +196,18 @@ export const ScannerPage: React.FC = () => {
               });
             }
           } else {
-            resultType = 'invalid';
-            message = 'Ticket not found in local database';
+            // Sound FIRST
             playSound('failure');
             vibrate([100, 50, 100]);
+            resultType = 'invalid';
+            message = 'Ticket not found in local database';
           }
         }
       } catch (err) {
+        // Sound FIRST on error
+        playSound('failure');
+        vibrate([100, 50, 100]);
+        
         console.error('Scan error:', err);
         
         // Handle axios errors with response data (non-2xx status codes)
@@ -230,9 +242,6 @@ export const ScannerPage: React.FC = () => {
           resultType = 'error';
           message = 'Network error - please check your connection';
         }
-        
-        playSound('failure');
-        vibrate([100, 50, 100]);
       }
 
       const result: ScanResult = {
@@ -247,10 +256,10 @@ export const ScannerPage: React.FC = () => {
 
       addScanResult(result);
 
-      // Resume scanning after a delay
+      // Resume scanning faster - 1s for valid, 1.5s for invalid
       setTimeout(() => {
         setIsScanning(true);
-      }, resultType === 'valid' ? 2000 : 3000);
+      }, resultType === 'valid' ? 1000 : 1500);
     },
     [
       eventId,

@@ -10,7 +10,7 @@ interface ScanResultDisplayProps {
 export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
   result,
   onDismiss,
-  autoDismissMs = 3000,
+  autoDismissMs = 1500, // Faster auto-dismiss for valid tickets
 }) => {
   useEffect(() => {
     if (result && result.type === 'valid') {
