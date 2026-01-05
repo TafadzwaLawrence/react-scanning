@@ -133,6 +133,16 @@ body {
   to { opacity: 1; }
 }
 
+@keyframes shrink-width {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* Custom animation class */
+.animate-shrink-width {
+  animation: shrink-width linear forwards;
+}
+
 /* Scanner Overlay Styles */
 .scanner-overlay {
   position: absolute;

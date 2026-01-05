@@ -6,7 +6,7 @@ interface QRScannerProps {
   onError?: (error: string) => void;
 }
 
-// Supported formats - QR codes and common barcodes
+// All supported formats for high precision detection
 const SUPPORTED_FORMATS = [
   Html5QrcodeSupportedFormats.QR_CODE,
   Html5QrcodeSupportedFormats.CODE_128,
@@ -15,6 +15,9 @@ const SUPPORTED_FORMATS = [
   Html5QrcodeSupportedFormats.EAN_8,
   Html5QrcodeSupportedFormats.UPC_A,
   Html5QrcodeSupportedFormats.UPC_E,
+  Html5QrcodeSupportedFormats.DATA_MATRIX,
+  Html5QrcodeSupportedFormats.PDF_417,
+  Html5QrcodeSupportedFormats.AZTEC,
 ];
 
 // Memoized component - NEVER re-renders from parent updates
@@ -48,22 +51,25 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
 
     const startScanner = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await new Promise(resolve => setTimeout(resolve, 100));
         if (!mounted) return;
 
         const html5QrCode = new Html5Qrcode(elementId, {
           formatsToSupport: SUPPORTED_FORMATS,
           verbose: false,
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true // Use native BarcodeDetector API when available (faster)
+          }
         });
         scannerRef.current = html5QrCode;
 
         const containerWidth = containerRef.current?.clientWidth || 300;
-        const qrboxSize = Math.min(containerWidth - 40, 260);
+        const qrboxSize = Math.min(containerWidth - 32, 280);
 
         await html5QrCode.start(
           { facingMode: 'environment' },
           {
-            fps: 30,
+            fps: 60, // Maximum FPS for fastest detection
             qrbox: { width: qrboxSize, height: qrboxSize },
             aspectRatio: 1,
             disableFlip: false,
@@ -71,15 +77,15 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
           (decodedText) => {
             // Quick visual flash
             setScanFlash(true);
-            setTimeout(() => setScanFlash(false), 150);
+            setTimeout(() => setScanFlash(false), 120);
             
-            // Haptic
+            // Haptic feedback
             vibrate();
             
-            // Call via ref - never stale
+            // Call via ref - never stale, camera NEVER stops
             onScanRef.current(decodedText);
           },
-          () => {} // Ignore empty frames
+          () => {} // Ignore empty frames silently
         );
 
         if (!mounted) {
@@ -107,7 +113,7 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
 
     startScanner();
 
-    // Cleanup only on unmount (leaving page)
+    // Cleanup ONLY on unmount (leaving page) - NEVER during scanning
     return () => {
       mounted = false;
       if (scannerRef.current) {

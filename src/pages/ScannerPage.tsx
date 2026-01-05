@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Howl } from 'howler';
+import useSound from 'use-sound';
 import { QRScanner, ScanResultDisplay, ScanStats, CameraPermission } from '@/components/scanner';
 import { Badge, Button, Card } from '@/components/ui';
 import { useAuthStore, useEventStore, useScannerStore, useSyncStore, useToast } from '@/stores';
@@ -9,19 +9,6 @@ import { db } from '@/services/db';
 import { generateUUID } from '@/utils';
 import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
 import { AxiosError } from 'axios';
-
-// Preload sounds using Howler.js for reliable cross-platform audio
-const successSound = new Howl({
-  src: ['/sounds/success.mp3'],
-  volume: 1.0,
-  preload: true,
-});
-
-const failureSound = new Howl({
-  src: ['/sounds/failure.mp3'],
-  volume: 1.0,
-  preload: true,
-});
 
 export const ScannerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -33,24 +20,20 @@ export const ScannerPage: React.FC = () => {
 
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
   
+  // use-sound hooks - reliable audio playback with sprite support
+  const [playSuccess] = useSound('/sounds/success.mp3', { volume: 1 });
+  const [playFailure] = useSound('/sounds/failure.mp3', { volume: 1 });
+  
   // Use refs for processing state - NO STATE CHANGES = NO CAMERA RESTART
   const isProcessingRef = useRef(false);
   const lastScanTimeRef = useRef(0);
-  const SCAN_COOLDOWN = 1500;
+  const lastScannedCodeRef = useRef<string>('');
+  const SCAN_COOLDOWN = 1200; // 1.2 second cooldown between same code
 
   const eventId = eventDetails?.event_id;
 
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
-
-  // Play sound using Howler - GUARANTEED to work every time
-  const playSound = useCallback((type: 'success' | 'failure') => {
-    if (type === 'success') {
-      successSound.play();
-    } else {
-      failureSound.play();
-    }
-  }, []);
 
   // Vibrate helper
   const vibrate = useCallback((pattern: number | number[]) => {
@@ -67,12 +50,16 @@ export const ScannerPage: React.FC = () => {
     async (qrCode: string) => {
       // Ref-based cooldown - no state changes, camera never restarts
       const now = Date.now();
-      if (isProcessingRef.current || now - lastScanTimeRef.current < SCAN_COOLDOWN) {
+      
+      // Skip if same code scanned too quickly or still processing
+      if (isProcessingRef.current) return;
+      if (qrCode === lastScannedCodeRef.current && now - lastScanTimeRef.current < SCAN_COOLDOWN) {
         return;
       }
       
       isProcessingRef.current = true;
       lastScanTimeRef.current = now;
+      lastScannedCodeRef.current = qrCode;
 
       if (!eventId || !deviceId) {
         toast.error('Setup required', 'Please log in again');
@@ -95,7 +82,7 @@ export const ScannerPage: React.FC = () => {
           );
 
           if (response.status === 200) {
-            playSound('success');
+            playSuccess();
             vibrate(100);
             resultType = 'valid';
             message = 'Ticket validated';
@@ -106,7 +93,7 @@ export const ScannerPage: React.FC = () => {
             };
             db.markAsScanned(qrCode, deviceId).catch(console.error);
           } else if (response.status === 403) {
-            playSound('failure');
+            playFailure();
             vibrate([50, 30, 50]);
             if ('scanned_at' in response) {
               resultType = 'used';
@@ -120,12 +107,12 @@ export const ScannerPage: React.FC = () => {
               message = (response as any).message || 'Invalid';
             }
           } else if (response.status === 404) {
-            playSound('failure');
+            playFailure();
             vibrate([50, 30, 50]);
             resultType = 'invalid';
             message = 'Not found';
           } else {
-            playSound('failure');
+            playFailure();
             vibrate([50, 30, 50]);
             resultType = 'error';
             message = (response as any).message || 'Error';
@@ -134,18 +121,18 @@ export const ScannerPage: React.FC = () => {
           const localTicket = await db.getTicketByQRCode(qrCode);
           if (localTicket) {
             if (localTicket.log_count > 0) {
-              playSound('failure');
+              playFailure();
               vibrate([50, 30, 50]);
               resultType = 'used';
               message = 'Already scanned';
               ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
             } else if (selectedTicketTypes.length > 0 && !selectedTicketTypes.includes(localTicket.ticket_type)) {
-              playSound('failure');
+              playFailure();
               vibrate([50, 30, 50]);
               resultType = 'wrong-type';
               message = `Type: ${localTicket.ticket_type}`;
             } else {
-              playSound('success');
+              playSuccess();
               vibrate(100);
               resultType = 'valid';
               message = 'Offline validated';
@@ -154,14 +141,14 @@ export const ScannerPage: React.FC = () => {
               addPendingScan({ qrCode, deviceId, scannedAt: Date.now() });
             }
           } else {
-            playSound('failure');
+            playFailure();
             vibrate([50, 30, 50]);
             resultType = 'invalid';
             message = 'Not in database';
           }
         }
       } catch (err) {
-        playSound('failure');
+        playFailure();
         vibrate([50, 30, 50]);
         
         if (err instanceof AxiosError && err.response?.data) {
@@ -201,12 +188,12 @@ export const ScannerPage: React.FC = () => {
         requiredTypes: selectedTicketTypes,
       });
 
-      // Release lock after cooldown
+      // Release lock after short delay
       setTimeout(() => {
         isProcessingRef.current = false;
-      }, SCAN_COOLDOWN);
+      }, 300);
     },
-    [eventId, deviceId, selectedTicketTypes, isOnline, toast, playSound, vibrate, addScanResult, addPendingScan]
+    [eventId, deviceId, selectedTicketTypes, isOnline, toast, playSuccess, playFailure, vibrate, addScanResult, addPendingScan]
   );
 
   const handleDismissResult = useCallback(() => {
