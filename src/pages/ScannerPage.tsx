@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { QRScanner, ScanResultDisplay, ScanStats, CameraPermission } from '@/components/scanner';
-import { Badge } from '@/components/ui';
+import { Badge, Button, Card } from '@/components/ui';
 import { useAuthStore, useEventStore, useScannerStore, useSyncStore, useToast } from '@/stores';
 import { ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
@@ -8,8 +9,9 @@ import { generateUUID } from '@/utils';
 import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
 
 export const ScannerPage: React.FC = () => {
+  const navigate = useNavigate();
   const toast = useToast();
-  const { deviceId, eventDetails } = useAuthStore();
+  const { deviceId, eventDetails, isAuthenticated } = useAuthStore();
   const { selectedTicketTypes } = useEventStore();
   const { stats, addScanResult, lastScanResult, clearLastResult } = useScannerStore();
   const { isOnline, addPendingScan, totalScans, syncedScans } = useSyncStore();
@@ -19,6 +21,16 @@ export const ScannerPage: React.FC = () => {
 
   // Get event ID from authStore (set during login)
   const eventId = eventDetails?.event_id;
+
+  // Debug log
+  useEffect(() => {
+    console.log('ScannerPage - Auth state:', { 
+      isAuthenticated, 
+      deviceId, 
+      eventDetails,
+      eventId 
+    });
+  }, [isAuthenticated, deviceId, eventDetails, eventId]);
 
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
@@ -212,6 +224,32 @@ export const ScannerPage: React.FC = () => {
   const handlePermissionGranted = useCallback(() => {
     setCameraPermissionGranted(true);
   }, []);
+
+  // Show setup required screen if no event ID
+  if (!eventId || !deviceId) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 pb-20">
+        <Card className="w-full max-w-md text-center" padding="lg">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Setup Required</h2>
+          <p className="text-gray-600 mb-6">
+            Please log in to an event before you can start scanning tickets.
+          </p>
+          <Button
+            variant="primary"
+            fullWidth
+            onClick={() => navigate('/login')}
+          >
+            Go to Login
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   // Show camera permission request first
   if (!cameraPermissionGranted) {

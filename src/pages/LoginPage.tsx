@@ -43,6 +43,7 @@ export const LoginPage: React.FC = () => {
       });
 
       if (response.status === 'success' && response.session_token && response.event_details) {
+        console.log('Login successful, saving event details:', response.event_details);
         login(response.session_token, response.event_details);
         toast.success('Login successful', `Welcome to ${response.event_details.event_name}`);
         
