@@ -328,10 +328,10 @@ export const ScannerPage: React.FC = () => {
         <ScanStats stats={stats} syncPercentage={syncPercentage} />
       </div>
 
-      {/* Scanner */}
+      {/* Scanner - always enabled, don't stop for results */}
       <div className="flex-1 relative">
         <QRScanner
-          isEnabled={isScanning && !lastScanResult}
+          isEnabled={isScanning}
           onScan={handleScan}
           onError={(error) => toast.error('Camera Error', error)}
         />
