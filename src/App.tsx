@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import {
   LoginPage,
   DashboardPage,
@@ -14,7 +14,41 @@ import { ToastContainer } from '@/components/ui';
 import { PWAUpdatePrompt } from '@/components/pwa';
 import { useSyncStore } from '@/stores';
 
-function App() {
+// Theme colors for different pages
+const PAGE_THEME_COLORS: Record<string, string> = {
+  '/login': '#4f46e5', // Indigo for login
+  '/scanner': '#111827', // Gray-900 for scanner
+  '/dashboard': '#111827', // Gray-900 for dashboard header
+  '/history': '#111827', // Gray-900
+  '/reports': '#111827', // Gray-900
+  '/settings': '#111827', // Gray-900
+};
+
+// Component to handle theme color changes
+function ThemeColorManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    const themeColor = PAGE_THEME_COLORS[path] || '#111827';
+    
+    // Update all theme-color meta tags
+    const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+    metaTags.forEach((meta) => {
+      meta.setAttribute('content', themeColor);
+    });
+    
+    // Also update msapplication-navbutton-color for Edge
+    const navButtonMeta = document.querySelector('meta[name="msapplication-navbutton-color"]');
+    if (navButtonMeta) {
+      navButtonMeta.setAttribute('content', themeColor);
+    }
+  }, [location.pathname]);
+
+  return null;
+}
+
+function AppContent() {
   // Setup online/offline listeners
   useEffect(() => {
     const setOnline = useSyncStore.getState().setOnline;
@@ -35,8 +69,9 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-gray-50">
+    <>
+      <ThemeColorManager />
+      <div className="min-h-screen bg-gray-900">
         <OfflineIndicator />
         <ToastContainer />
         <PWAUpdatePrompt />
@@ -94,6 +129,14 @@ function App() {
 
         <BottomNav />
       </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

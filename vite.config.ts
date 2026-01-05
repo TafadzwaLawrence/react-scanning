@@ -13,7 +13,7 @@ export default defineConfig({
         name: '263tickets Scanner',
         short_name: 'Scanner',
         description: 'Ticket scanning application for 263tickets.com events',
-        theme_color: '#6366F1',
+        theme_color: '#111827',
         background_color: '#111827',
         display: 'standalone',
         orientation: 'portrait',
