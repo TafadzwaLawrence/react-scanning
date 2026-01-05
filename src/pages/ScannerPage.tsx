@@ -7,6 +7,7 @@ import { ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
 import { generateUUID } from '@/utils';
 import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
+import { AxiosError } from 'axios';
 
 export const ScannerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -115,6 +116,12 @@ export const ScannerPage: React.FC = () => {
             message = 'Ticket not found';
             playSound('failure');
             vibrate([100, 50, 100]);
+          } else {
+            // Handle any other status codes
+            resultType = 'error';
+            message = (response as any).message || 'Unknown verification error';
+            playSound('failure');
+            vibrate([100, 50, 100]);
           }
         } else {
           // Offline verification
@@ -164,8 +171,40 @@ export const ScannerPage: React.FC = () => {
         }
       } catch (err) {
         console.error('Scan error:', err);
-        resultType = 'error';
-        message = 'An error occurred while verifying the ticket';
+        
+        // Handle axios errors with response data (non-2xx status codes)
+        if (err instanceof AxiosError && err.response?.data) {
+          const errorData = err.response.data as VerifyResponse;
+          console.log('API error response:', errorData);
+          
+          if (err.response.status === 404 || errorData.status === 404) {
+            resultType = 'invalid';
+            message = (errorData as any).message || 'Ticket not found';
+          } else if (err.response.status === 403 || errorData.status === 403) {
+            if ('scanned_at' in errorData) {
+              resultType = 'used';
+              message = `Already scanned at ${(errorData as any).scanned_at}`;
+              ticket = {
+                type: (errorData as any).type,
+                admittence: (errorData as any).admittence,
+                number: (errorData as any).number,
+              };
+            } else if ('ticket_name' in errorData) {
+              resultType = 'wrong-type';
+              message = `Wrong ticket type: ${(errorData as any).ticket_name}`;
+            } else {
+              resultType = 'invalid';
+              message = (errorData as any).message || 'Ticket not valid';
+            }
+          } else {
+            resultType = 'error';
+            message = (errorData as any).message || 'Verification failed';
+          }
+        } else {
+          resultType = 'error';
+          message = 'Network error - please check your connection';
+        }
+        
         playSound('failure');
         vibrate([100, 50, 100]);
       }
