@@ -36,10 +36,14 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   const lastScannedTimeRef = useRef<number>(0);
   const cooldownMs = 1500; // Reduced for faster queue processing
 
-  // Vibrate on scan
+  // Vibrate on scan - stronger feedback when QR is detected
   const vibrateOnScan = useCallback(() => {
     if ('vibrate' in navigator) {
-      navigator.vibrate(50); // Short vibration when QR is detected
+      try {
+        navigator.vibrate([100]); // 100ms vibration when QR is detected
+      } catch (e) {
+        console.log('Vibration failed:', e);
+      }
     }
   }, []);
 
