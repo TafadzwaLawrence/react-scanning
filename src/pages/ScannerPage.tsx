@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRScanner, ScanResultDisplay, ScanStats, CameraPermission } from '@/components/scanner';
 import { Badge, Button, Card } from '@/components/ui';
