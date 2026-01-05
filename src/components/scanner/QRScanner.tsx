@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, memo } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 interface QRScannerProps {
@@ -17,39 +17,38 @@ const SUPPORTED_FORMATS = [
   Html5QrcodeSupportedFormats.UPC_E,
 ];
 
-export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onError }) => {
+// Memoized component - NEVER re-renders from parent updates
+export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) => {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Store callbacks in refs - updates don't cause re-renders
   const onScanRef = useRef(onScan);
+  const onErrorRef = useRef(onError);
+  
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hasFlash, setHasFlash] = useState(false);
   const [isStarting, setIsStarting] = useState(true);
   const [scanFlash, setScanFlash] = useState(false);
 
-  // Keep onScan ref updated without triggering re-renders
-  useEffect(() => {
-    onScanRef.current = onScan;
-  }, [onScan]);
+  // Update refs silently (no re-render, no effect trigger)
+  onScanRef.current = onScan;
+  onErrorRef.current = onError;
 
-  // Vibrate on QR detection
-  const vibrateOnDetect = useCallback(() => {
-    if ('vibrate' in navigator) {
-      try {
-        navigator.vibrate(80);
-      } catch (e) {
-        // Ignore
-      }
-    }
-  }, []);
-
-  // Start scanner ONCE on mount, never restart
+  // Start scanner ONCE on mount - empty deps = run once only
   useEffect(() => {
     const elementId = 'qr-reader';
     let mounted = true;
 
+    const vibrate = () => {
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(80); } catch {}
+      }
+    };
+
     const startScanner = async () => {
       try {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 150));
         if (!mounted) return;
 
         const html5QrCode = new Html5Qrcode(elementId, {
@@ -70,17 +69,17 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onError }) => {
             disableFlip: false,
           },
           (decodedText) => {
-            // Visual feedback
+            // Quick visual flash
             setScanFlash(true);
-            setTimeout(() => setScanFlash(false), 200);
+            setTimeout(() => setScanFlash(false), 150);
             
-            // Haptic feedback
-            vibrateOnDetect();
+            // Haptic
+            vibrate();
             
-            // Call handler via ref (no re-render dependency)
+            // Call via ref - never stale
             onScanRef.current(decodedText);
           },
-          () => {} // Ignore no-QR frames
+          () => {} // Ignore empty frames
         );
 
         if (!mounted) {
@@ -88,7 +87,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onError }) => {
           return;
         }
 
-        // Check flash
+        // Check flash capability
         try {
           const track = html5QrCode.getRunningTrackCameraCapabilities();
           setHasFlash(track?.torchFeature()?.isSupported() || false);
@@ -100,7 +99,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onError }) => {
       } catch (err) {
         console.error('Scanner error:', err);
         if (mounted) {
-          onError?.('Camera failed. Check permissions.');
+          onErrorRef.current?.('Camera failed. Check permissions.');
           setIsStarting(false);
         }
       }
@@ -108,6 +107,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onError }) => {
 
     startScanner();
 
+    // Cleanup only on unmount (leaving page)
     return () => {
       mounted = false;
       if (scannerRef.current) {
@@ -117,13 +117,11 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onError }) => {
             scannerRef.current.stop().catch(() => {});
           }
           scannerRef.current.clear();
-        } catch (e) {
-          // Ignore cleanup errors
-        }
+        } catch {}
         scannerRef.current = null;
       }
     };
-  }, [vibrateOnDetect, onError]); // Only run once on mount
+  }, []); // EMPTY DEPS - runs once on mount, cleanup on unmount ONLY
 
   const toggleFlash = async () => {
     if (!scannerRef.current || !hasFlash) return;
@@ -151,7 +149,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onError }) => {
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
         <div 
           className={`
-            w-64 h-64 border-2 rounded-lg transition-all duration-150
+            w-64 h-64 border-2 rounded-lg transition-all duration-100
             ${scanFlash ? 'border-green-400 bg-green-400/30 scale-95' : 'border-white/60'}
           `}
         >
@@ -202,4 +200,4 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onError }) => {
       )}
     </div>
   );
-};
+}, () => true); // Custom comparison - ALWAYS return true = NEVER re-render from props
