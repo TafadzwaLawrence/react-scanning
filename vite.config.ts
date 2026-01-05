@@ -8,17 +8,20 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.png', 'sounds/*.mp3'],
+      includeAssets: ['favicon.ico', 'icons/*.png', 'icons/*.svg', 'sounds/*.mp3'],
       manifest: {
-        name: 'Scan - 263tickets',
-        short_name: 'Scan',
+        name: '263tickets Scanner',
+        short_name: 'Scanner',
         description: 'Ticket scanning application for 263tickets.com events',
         theme_color: '#6366F1',
-        background_color: '#F9FAFB',
+        background_color: '#111827',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
+        id: '/',
+        categories: ['utilities', 'business'],
+        screenshots: [],
         icons: [
           {
             src: '/icons/icon-72.svg',
@@ -49,6 +52,7 @@ export default defineConfig({
             src: '/icons/icon-192.svg',
             sizes: '192x192',
             type: 'image/svg+xml',
+            purpose: 'any',
           },
           {
             src: '/icons/icon-384.svg',
@@ -59,12 +63,21 @@ export default defineConfig({
             src: '/icons/icon-512.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
-            purpose: 'any maskable',
+            purpose: 'any',
+          },
+          {
+            src: '/icons/icon-512.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'maskable',
           },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.263tickets\.com\/api\/v1\/.*/i,
