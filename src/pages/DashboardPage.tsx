@@ -66,15 +66,15 @@ export const DashboardPage: React.FC = () => {
   // Show setup prompt if no tickets downloaded
   if (totalTickets === 0) {
     return (
-      <div className="min-h-screen bg-gray-900 pb-20">
+      <div className="min-h-screen bg-gray-100 pb-20">
         {/* Header */}
-        <div className="bg-gray-800 text-white p-4">
+        <div className="bg-white border-b border-gray-200 text-gray-900 p-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">
                 {eventDetails?.event_name || 'Dashboard'}
               </h1>
-              <p className="text-sm text-white/80 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 Device: <span className="font-mono">{deviceId}</span>
               </p>
             </div>
@@ -115,15 +115,15 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 pb-20">
+    <div className="min-h-screen bg-gray-100 pb-20">
       {/* Header */}
-      <div className="bg-gray-800 text-white p-4">
+      <div className="bg-white border-b border-gray-200 text-gray-900 p-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold">
               {eventDetails?.event_name || 'Dashboard'}
             </h1>
-            <p className="text-sm text-white/80 mt-1">
+            <p className="text-sm text-gray-500 mt-1">
               Device: <span className="font-mono">{deviceId}</span>
             </p>
           </div>

@@ -6,8 +6,8 @@ const routeThemeColors: Record<string, string> = {
   '/login': '#6366F1', // Indigo - matches login gradient
 };
 
-// Gray-800 for all authenticated pages with dark headers
-const DEFAULT_THEME_COLOR = '#1F2937';
+// White for all authenticated pages with white headers
+const DEFAULT_THEME_COLOR = '#FFFFFF';
 
 export function useThemeColor() {
   const location = useLocation();
