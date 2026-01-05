@@ -14,6 +14,7 @@
     "date-fns": "^4.1.0",
     "dexie": "^4.2.1",
     "file-saver": "^2.0.5",
+    "howler": "^2.2.4",
     "html5-qrcode": "^2.3.8",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "@types/file-saver": "^2.0.7",
+    "@types/howler": "^2.2.12",
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

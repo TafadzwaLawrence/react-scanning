@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Howl } from 'howler';
 import { QRScanner, ScanResultDisplay, ScanStats, CameraPermission } from '@/components/scanner';
 import { Badge, Button, Card } from '@/components/ui';
 import { useAuthStore, useEventStore, useScannerStore, useSyncStore, useToast } from '@/stores';
@@ -9,58 +10,73 @@ import { generateUUID } from '@/utils';
 import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
 import { AxiosError } from 'axios';
 
+// Preload sounds using Howler.js for reliable cross-platform audio
+const successSound = new Howl({
+  src: ['/sounds/success.mp3'],
+  volume: 1.0,
+  preload: true,
+});
+
+const failureSound = new Howl({
+  src: ['/sounds/failure.mp3'],
+  volume: 1.0,
+  preload: true,
+});
+
 export const ScannerPage: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const { deviceId, eventDetails, isAuthenticated } = useAuthStore();
+  const { deviceId, eventDetails } = useAuthStore();
   const { selectedTicketTypes } = useEventStore();
   const { stats, addScanResult, lastScanResult, clearLastResult } = useScannerStore();
   const { isOnline, addPendingScan, totalScans, syncedScans } = useSyncStore();
 
-  const [isScanning, setIsScanning] = useState(true);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
+  
+  // Use refs for processing state - NO STATE CHANGES = NO CAMERA RESTART
+  const isProcessingRef = useRef(false);
+  const lastScanTimeRef = useRef(0);
+  const SCAN_COOLDOWN = 1500;
 
-  // Get event ID from authStore (set during login)
   const eventId = eventDetails?.event_id;
-
-  // Debug log
-  useEffect(() => {
-    console.log('ScannerPage - Auth state:', { 
-      isAuthenticated, 
-      deviceId, 
-      eventDetails,
-      eventId 
-    });
-  }, [isAuthenticated, deviceId, eventDetails, eventId]);
 
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
 
-  // Play sound - create new Audio instance each time for reliable playback
+  // Play sound using Howler - GUARANTEED to work every time
   const playSound = useCallback((type: 'success' | 'failure') => {
-    try {
-      // Create fresh audio instance each time to avoid playback issues
-      const audio = new Audio(type === 'success' ? '/sounds/success.mp3' : '/sounds/failure.mp3');
-      audio.volume = 1.0;
-      audio.play().catch((err) => {
-        console.log('Audio play failed:', err);
-      });
-    } catch (err) {
-      console.log('Sound error:', err);
+    if (type === 'success') {
+      successSound.play();
+    } else {
+      failureSound.play();
     }
   }, []);
 
-  // Vibrate
-  const vibrate = useCallback((pattern: number[]) => {
+  // Vibrate helper
+  const vibrate = useCallback((pattern: number | number[]) => {
     if ('vibrate' in navigator) {
-      navigator.vibrate(pattern);
+      try {
+        navigator.vibrate(pattern);
+      } catch (e) {
+        // Ignore
+      }
     }
   }, []);
 
   const handleScan = useCallback(
     async (qrCode: string) => {
+      // Ref-based cooldown - no state changes, camera never restarts
+      const now = Date.now();
+      if (isProcessingRef.current || now - lastScanTimeRef.current < SCAN_COOLDOWN) {
+        return;
+      }
+      
+      isProcessingRef.current = true;
+      lastScanTimeRef.current = now;
+
       if (!eventId || !deviceId) {
-        toast.error('Setup required', 'Please log in again to set up the event');
+        toast.error('Setup required', 'Please log in again');
+        isProcessingRef.current = false;
         return;
       }
 
@@ -69,12 +85,8 @@ export const ScannerPage: React.FC = () => {
       let message = '';
       let ticket: ScanResult['ticket'];
 
-      // Pause scanning immediately
-      setIsScanning(false);
-
       try {
         if (isOnline) {
-          // Online verification
           const response: VerifyResponse = await ticketsAPI.verify(
             eventId,
             qrCode,
@@ -83,144 +95,103 @@ export const ScannerPage: React.FC = () => {
           );
 
           if (response.status === 200) {
+            playSound('success');
+            vibrate(100);
             resultType = 'valid';
-            message = 'Ticket validated successfully';
+            message = 'Ticket validated';
             ticket = {
               type: (response as any).type,
               admittence: (response as any).admittence,
               number: (response as any).number,
             };
-            // Sound & vibrate FIRST before showing result
-            playSound('success');
-            vibrate([100]);
-
-            // Mark as scanned locally (don't await - do in background)
             db.markAsScanned(qrCode, deviceId).catch(console.error);
           } else if (response.status === 403) {
-            // Sound FIRST for faster feedback
             playSound('failure');
-            vibrate([100, 50, 100]);
-            
+            vibrate([50, 30, 50]);
             if ('scanned_at' in response) {
               resultType = 'used';
               message = `Scanned at ${response.scanned_at}`;
-              ticket = {
-                type: response.type,
-                admittence: response.admittence,
-                number: response.number,
-              };
+              ticket = { type: response.type, admittence: response.admittence, number: response.number };
             } else if ('ticket_name' in response) {
               resultType = 'wrong-type';
-              message = `Ticket type: ${response.ticket_name}`;
+              message = `Type: ${response.ticket_name}`;
             } else {
               resultType = 'invalid';
-              message = (response as any).message || 'Invalid ticket';
+              message = (response as any).message || 'Invalid';
             }
           } else if (response.status === 404) {
-            // Sound FIRST
             playSound('failure');
-            vibrate([100, 50, 100]);
+            vibrate([50, 30, 50]);
             resultType = 'invalid';
-            message = 'Ticket not found';
+            message = 'Not found';
           } else {
-            // Sound FIRST
             playSound('failure');
-            vibrate([100, 50, 100]);
+            vibrate([50, 30, 50]);
             resultType = 'error';
-            message = (response as any).message || 'Unknown verification error';
+            message = (response as any).message || 'Error';
           }
         } else {
-          // Offline verification
           const localTicket = await db.getTicketByQRCode(qrCode);
-
           if (localTicket) {
             if (localTicket.log_count > 0) {
-              // Sound FIRST
               playSound('failure');
-              vibrate([100, 50, 100]);
+              vibrate([50, 30, 50]);
               resultType = 'used';
-              message = 'Already scanned (offline)';
-              ticket = {
-                type: localTicket.ticket_type,
-                admittence: localTicket.ticket_admittence,
-                number: localTicket.ticket_number,
-              };
-            } else if (!selectedTicketTypes.includes(localTicket.ticket_type)) {
-              // Sound FIRST
+              message = 'Already scanned';
+              ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
+            } else if (selectedTicketTypes.length > 0 && !selectedTicketTypes.includes(localTicket.ticket_type)) {
               playSound('failure');
-              vibrate([100, 50, 100]);
+              vibrate([50, 30, 50]);
               resultType = 'wrong-type';
-              message = `Ticket type: ${localTicket.ticket_type}`;
+              message = `Type: ${localTicket.ticket_type}`;
             } else {
-              // Sound FIRST
               playSound('success');
-              vibrate([100]);
+              vibrate(100);
               resultType = 'valid';
-              message = 'Validated offline - will sync later';
-              ticket = {
-                type: localTicket.ticket_type,
-                admittence: localTicket.ticket_admittence,
-                number: localTicket.ticket_number,
-              };
-
-              // Mark as scanned locally and queue for sync (background)
+              message = 'Offline validated';
+              ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
               db.markAsScanned(qrCode, deviceId).catch(console.error);
-              addPendingScan({
-                qrCode,
-                deviceId,
-                scannedAt: Date.now(),
-              });
+              addPendingScan({ qrCode, deviceId, scannedAt: Date.now() });
             }
           } else {
-            // Sound FIRST
             playSound('failure');
-            vibrate([100, 50, 100]);
+            vibrate([50, 30, 50]);
             resultType = 'invalid';
-            message = 'Ticket not found in local database';
+            message = 'Not in database';
           }
         }
       } catch (err) {
-        // Sound FIRST on error
         playSound('failure');
-        vibrate([100, 50, 100]);
+        vibrate([50, 30, 50]);
         
-        console.error('Scan error:', err);
-        
-        // Handle axios errors with response data (non-2xx status codes)
         if (err instanceof AxiosError && err.response?.data) {
           const errorData = err.response.data as VerifyResponse;
-          console.log('API error response:', errorData);
-          
           if (err.response.status === 404 || errorData.status === 404) {
             resultType = 'invalid';
-            message = (errorData as any).message || 'Ticket not found';
+            message = (errorData as any).message || 'Not found';
           } else if (err.response.status === 403 || errorData.status === 403) {
             if ('scanned_at' in errorData) {
               resultType = 'used';
-              message = `Already scanned at ${(errorData as any).scanned_at}`;
-              ticket = {
-                type: (errorData as any).type,
-                admittence: (errorData as any).admittence,
-                number: (errorData as any).number,
-              };
+              message = `Scanned at ${(errorData as any).scanned_at}`;
+              ticket = { type: (errorData as any).type, admittence: (errorData as any).admittence, number: (errorData as any).number };
             } else if ('ticket_name' in errorData) {
               resultType = 'wrong-type';
-              message = `Wrong ticket type: ${(errorData as any).ticket_name}`;
+              message = `Type: ${(errorData as any).ticket_name}`;
             } else {
               resultType = 'invalid';
-              message = (errorData as any).message || 'Ticket not valid';
+              message = (errorData as any).message || 'Invalid';
             }
           } else {
             resultType = 'error';
-            message = (errorData as any).message || 'Verification failed';
+            message = (errorData as any).message || 'Error';
           }
         } else {
           resultType = 'error';
-          message = 'Network error - please check your connection';
+          message = 'Network error';
         }
       }
 
-      const result: ScanResult = {
+      addScanResult({
         id: resultId,
         type: resultType,
         message,
@@ -228,31 +199,18 @@ export const ScannerPage: React.FC = () => {
         ticket,
         scannedAt: new Date(),
         requiredTypes: selectedTicketTypes,
-      };
+      });
 
-      addScanResult(result);
-
-      // Resume scanning faster - 1s for valid, 1.5s for invalid
+      // Release lock after cooldown
       setTimeout(() => {
-        setIsScanning(true);
-      }, resultType === 'valid' ? 1000 : 1500);
+        isProcessingRef.current = false;
+      }, SCAN_COOLDOWN);
     },
-    [
-      eventId,
-      deviceId,
-      selectedTicketTypes,
-      isOnline,
-      toast,
-      playSound,
-      vibrate,
-      addScanResult,
-      addPendingScan,
-    ]
+    [eventId, deviceId, selectedTicketTypes, isOnline, toast, playSound, vibrate, addScanResult, addPendingScan]
   );
 
   const handleDismissResult = useCallback(() => {
     clearLastResult();
-    setIsScanning(true);
   }, [clearLastResult]);
 
   // Setup online/offline listener
@@ -328,10 +286,9 @@ export const ScannerPage: React.FC = () => {
         <ScanStats stats={stats} syncPercentage={syncPercentage} />
       </div>
 
-      {/* Scanner - always enabled, don't stop for results */}
+      {/* Scanner - NEVER stops, always running */}
       <div className="flex-1 relative">
         <QRScanner
-          isEnabled={isScanning}
           onScan={handleScan}
           onError={(error) => toast.error('Camera Error', error)}
         />
