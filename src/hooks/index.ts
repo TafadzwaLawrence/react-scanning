@@ -1,1 +1,1 @@
-// Hooks barrel export
+export { useThemeColor } from './useThemeColor';

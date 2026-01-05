@@ -13,6 +13,13 @@ import { BottomNav, OfflineIndicator } from '@/components/layout';
 import { ToastContainer } from '@/components/ui';
 import { PWAUpdatePrompt } from '@/components/pwa';
 import { useSyncStore } from '@/stores';
+import { useThemeColor } from '@/hooks';
+
+// Updates status bar color to match page headers
+function ThemeColorManager() {
+  useThemeColor();
+  return null;
+}
 
 function AppContent() {
   const location = useLocation();
@@ -39,6 +46,7 @@ function AppContent() {
 
   return (
     <>
+      <ThemeColorManager />
       <div className="min-h-screen bg-gray-100">
         <OfflineIndicator />
         <ToastContainer />
