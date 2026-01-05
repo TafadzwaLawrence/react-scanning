@@ -10,12 +10,15 @@ import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
 export const ScannerPage: React.FC = () => {
   const toast = useToast();
   const { deviceId, eventDetails } = useAuthStore();
-  const { selectedTicketTypes, selectedEventId } = useEventStore();
+  const { selectedTicketTypes } = useEventStore();
   const { stats, addScanResult, lastScanResult, clearLastResult } = useScannerStore();
   const { isOnline, addPendingScan, totalScans, syncedScans } = useSyncStore();
 
   const [isScanning, setIsScanning] = useState(true);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
+
+  // Get event ID from authStore (set during login)
+  const eventId = eventDetails?.event_id;
 
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
@@ -41,8 +44,8 @@ export const ScannerPage: React.FC = () => {
 
   const handleScan = useCallback(
     async (qrCode: string) => {
-      if (!selectedEventId || !deviceId) {
-        toast.error('Setup required', 'Please complete setup first');
+      if (!eventId || !deviceId) {
+        toast.error('Setup required', 'Please log in again to set up the event');
         return;
       }
 
@@ -58,7 +61,7 @@ export const ScannerPage: React.FC = () => {
         if (isOnline) {
           // Online verification
           const response: VerifyResponse = await ticketsAPI.verify(
-            selectedEventId,
+            eventId,
             qrCode,
             deviceId,
             selectedTicketTypes
@@ -173,7 +176,7 @@ export const ScannerPage: React.FC = () => {
       }, resultType === 'valid' ? 2000 : 3000);
     },
     [
-      selectedEventId,
+      eventId,
       deviceId,
       selectedTicketTypes,
       isOnline,
