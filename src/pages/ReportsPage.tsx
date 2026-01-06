@@ -63,7 +63,7 @@ export const ReportsPage: React.FC = () => {
   if (!isOnline) {
     return (
       <div className="min-h-screen bg-gray-100 pb-20">
-        <div className="bg-white border-b border-gray-200 p-4 pt-safe header-safe">
+        <div className="bg-white border-b border-gray-200 p-4">
           <h1 className="text-xl font-bold text-gray-900">Reports</h1>
         </div>
         <div className="p-4 flex flex-col items-center justify-center" style={{ minHeight: 'calc(100vh - 200px)' }}>
@@ -85,8 +85,8 @@ export const ReportsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-20">
-      {/* Header - extends behind status bar */}
-      <div className="bg-white border-b border-gray-200 p-4 pt-safe header-safe">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">Reports</h1>
           <Button

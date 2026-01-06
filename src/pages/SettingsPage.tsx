@@ -176,8 +176,8 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-20">
-      {/* Header - extends behind status bar */}
-      <div className="bg-white border-b border-gray-200 p-4 pt-safe header-safe">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 p-4">
         <h1 className="text-xl font-bold text-gray-900">Settings</h1>
       </div>
 

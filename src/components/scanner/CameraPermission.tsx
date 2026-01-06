@@ -180,7 +180,7 @@ export const CameraPermission: React.FC<CameraPermissionProps> = ({ onPermission
   // Render based on status
   if (status === 'checking') {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 pt-safe header-safe-dark">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center" padding="lg">
           <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4" />
           <p className="text-gray-600">Checking camera permissions...</p>
@@ -195,7 +195,7 @@ export const CameraPermission: React.FC<CameraPermissionProps> = ({ onPermission
 
   if (status === 'unsupported') {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 pt-safe header-safe-dark">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center" padding="lg">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -216,7 +216,7 @@ export const CameraPermission: React.FC<CameraPermissionProps> = ({ onPermission
 
   if (status === 'https-required') {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 pt-safe header-safe-dark">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center" padding="lg">
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -267,7 +267,7 @@ export const CameraPermission: React.FC<CameraPermissionProps> = ({ onPermission
 
   if (status === 'denied') {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 pt-safe header-safe-dark">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center" padding="lg">
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -301,7 +301,7 @@ export const CameraPermission: React.FC<CameraPermissionProps> = ({ onPermission
 
   // status === 'prompt'
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 pt-safe header-safe-dark">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <Card className="w-full max-w-md text-center" padding="lg">
         <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <svg className="w-10 h-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

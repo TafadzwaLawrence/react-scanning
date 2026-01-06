@@ -61,25 +61,10 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   min-height: 100vh;
-  /* Safe area for sides only - top handled by page headers for edge-to-edge */
+  /* Safe area for status bar */
+  padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
-}
-
-/* Edge-to-edge header that extends behind status bar */
-.header-safe {
-  padding-top: env(safe-area-inset-top);
-}
-
-/* Content padding for safe area */
-.pt-safe {
-  padding-top: calc(env(safe-area-inset-top) + 0.75rem);
-}
-
-/* Dark background variant for camera screens */
-.header-safe-dark {
-  padding-top: env(safe-area-inset-top);
-  background-color: rgb(17 24 39); /* gray-900 */
 }
 
 #root {
