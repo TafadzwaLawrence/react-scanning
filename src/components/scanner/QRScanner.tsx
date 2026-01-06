@@ -33,6 +33,7 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
   const [hasFlash, setHasFlash] = useState(false);
   const [isStarting, setIsStarting] = useState(true);
   const [scanFlash, setScanFlash] = useState(false);
+  const isRestartingRef = useRef(false);
 
   // Update refs silently (no re-render, no effect trigger)
   onScanRef.current = onScan;
@@ -50,9 +51,25 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
     };
 
     const startScanner = async () => {
+      if (isRestartingRef.current) return;
+      
       try {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // If scanner exists and is running, stop it first
+        if (scannerRef.current) {
+          try {
+            const state = scannerRef.current.getState();
+            if (state === 2) { // SCANNING state
+              await scannerRef.current.stop();
+            }
+            scannerRef.current.clear();
+          } catch {}
+          scannerRef.current = null;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 150));
         if (!mounted) return;
+
+        setIsStarting(true);
 
         const html5QrCode = new Html5Qrcode(elementId, {
           formatsToSupport: SUPPORTED_FORMATS,
@@ -111,11 +128,58 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
       }
     };
 
+    // Handle visibility change - restart camera when tab becomes visible again
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && mounted) {
+        // Tab is now visible - check if camera needs restart
+        if (scannerRef.current) {
+          try {
+            const state = scannerRef.current.getState();
+            // State 2 = SCANNING, if not scanning, restart
+            if (state !== 2) {
+              console.log('Camera not running, restarting...');
+              isRestartingRef.current = true;
+              await startScanner();
+              isRestartingRef.current = false;
+            }
+          } catch {
+            // Scanner may be in bad state, restart it
+            console.log('Scanner state error, restarting...');
+            isRestartingRef.current = true;
+            await startScanner();
+            isRestartingRef.current = false;
+          }
+        } else {
+          // No scanner instance, start fresh
+          isRestartingRef.current = true;
+          await startScanner();
+          isRestartingRef.current = false;
+        }
+      }
+    };
+
+    // Handle page focus - some browsers pause camera on blur
+    const handleFocus = () => {
+      if (mounted) {
+        // Small delay to let the browser settle
+        setTimeout(() => {
+          handleVisibilityChange();
+        }, 300);
+      }
+    };
+
     startScanner();
+
+    // Listen for visibility and focus changes
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
 
     // Cleanup ONLY on unmount (leaving page) - NEVER during scanning
     return () => {
       mounted = false;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+      
       if (scannerRef.current) {
         try {
           const state = scannerRef.current.getState();
