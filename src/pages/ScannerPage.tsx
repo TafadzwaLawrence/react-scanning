@@ -236,7 +236,7 @@ export const ScannerPage: React.FC = () => {
   // Show setup required screen if no event ID
   if (!eventId || !deviceId) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 pb-20">
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 pb-20 pt-safe header-safe">
         <Card className="w-full max-w-md text-center" padding="lg">
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -266,8 +266,8 @@ export const ScannerPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col pb-20">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-3 flex items-center justify-between">
+      {/* Header - extends behind status bar */}
+      <div className="bg-white border-b border-gray-200 p-3 pt-safe header-safe flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
             {eventDetails?.event_name || 'Scanner'}

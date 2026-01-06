@@ -70,7 +70,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 p-4 pt-safe header-safe">
       <Card className="w-full max-w-md" padding="lg">
         {/* Logo */}
         <div className="text-center mb-8">
