@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Input, Card, Checkbox } from '@/components/ui';
 import { useAuthStore, useSyncStore, useToast } from '@/stores';
 import { authAPI } from '@/services/api';
 import { db } from '@/services/db';
-import { loginRateLimiter, sanitizeInput } from '@/utils/security';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,50 +17,15 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [remainingAttempts, setRemainingAttempts] = useState(5);
 
   const from = location.state?.from?.pathname || '/dashboard';
-
-  // Check for security error params
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const errorType = params.get('error');
-    if (errorType === 'security') {
-      toast.error('Security Alert', 'Session terminated for security reasons');
-    } else if (errorType === 'integrity') {
-      toast.error('Security Alert', 'Application integrity check failed');
-    }
-  }, [location.search, toast]);
-
-  // Update remaining attempts display
-  useEffect(() => {
-    setRemainingAttempts(loginRateLimiter.getRemainingAttempts(deviceId));
-  }, [deviceId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Rate limiting check
-    if (!loginRateLimiter.isAllowed(deviceId)) {
-      setError('Too many login attempts. Please wait 5 minutes before trying again.');
-      setRemainingAttempts(0);
-      return;
-    }
-
-    setRemainingAttempts(loginRateLimiter.getRemainingAttempts(deviceId));
-
-    // Input validation
-    const sanitizedEventCode = sanitizeInput(eventCode.trim());
-    
-    if (!sanitizedEventCode || !password.trim()) {
+    if (!eventCode.trim() || !password.trim()) {
       setError('Please enter both event code and password');
-      return;
-    }
-
-    // Validate event code format (basic check)
-    if (sanitizedEventCode.length < 3 || sanitizedEventCode.length > 100) {
-      setError('Invalid event code format');
       return;
     }
 
@@ -69,16 +33,13 @@ export const LoginPage: React.FC = () => {
 
     try {
       const response = await authAPI.login({
-        event_identifier: sanitizedEventCode,
+        event_identifier: eventCode.trim(),
         password: password,
         device_id: deviceId,
         remember_me: rememberMe,
       });
 
       if (response.status === 'success' && response.session_token && response.event_details) {
-        // Reset rate limiter on successful login
-        loginRateLimiter.reset(deviceId);
-        
         login(response.session_token, response.event_details);
         toast.success('Login successful', `Welcome to ${response.event_details.event_name}`);
         
@@ -91,19 +52,12 @@ export const LoginPage: React.FC = () => {
           navigate('/settings', { replace: true });
         }
       } else {
-        setRemainingAttempts(loginRateLimiter.getRemainingAttempts(deviceId));
         setError(response.message || 'Login failed. Please check your credentials.');
       }
     } catch (err: unknown) {
-      setRemainingAttempts(loginRateLimiter.getRemainingAttempts(deviceId));
-      
       if (err instanceof Error) {
-        if (err.message.includes('Rate limit')) {
-          setError('Too many requests. Please wait before trying again.');
-        } else if (err.message.includes('Network Error') || err.message.includes('fetch')) {
+        if (err.message.includes('Network Error') || err.message.includes('fetch')) {
           setError('Network error. Please check your internet connection.');
-        } else if (err.message.includes('Invalid event ID')) {
-          setError('Invalid event code format.');
         } else {
           setError('Login failed. Please check your credentials.');
         }
@@ -167,11 +121,6 @@ export const LoginPage: React.FC = () => {
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 animate-shake">
               {error}
-              {remainingAttempts > 0 && remainingAttempts < 5 && (
-                <p className="text-xs mt-1 text-red-500">
-                  {remainingAttempts} attempt{remainingAttempts !== 1 ? 's' : ''} remaining
-                </p>
-              )}
             </div>
           )}
 

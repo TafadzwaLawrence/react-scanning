@@ -139,38 +139,4 @@ export default defineConfig({
     // This uses a self-signed certificate - you'll need to accept the security warning
     https: true,
   },
-  // Security: Production build optimizations
-  build: {
-    // Minify and obfuscate code
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.log in production
-        drop_debugger: true, // Remove debugger statements
-        pure_funcs: ['console.log', 'console.debug', 'console.info'], // Remove specific console methods
-      },
-      mangle: {
-        safari10: true, // Work around Safari 10 bugs
-      },
-      format: {
-        comments: false, // Remove comments
-      },
-    },
-    // Generate source maps only for error tracking (not for debugging)
-    sourcemap: false,
-    // Split chunks for better caching
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          charts: ['recharts'],
-          scanner: ['html5-qrcode'],
-        },
-        // Hash filenames for cache busting
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
-      },
-    },
-  },
 });
