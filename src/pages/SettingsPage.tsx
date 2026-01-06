@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Modal, Badge, Checkbox, Loading } from '@/components/ui';
-import { useAuthStore, useEventStore, useSyncStore, useScannerStore, useToast } from '@/stores';
-import { eventsAPI, authAPI } from '@/services/api';
+import { useAuthStore, useEventStore, useSyncStore, useScannerStore, useSettingsStore, useToast } from '@/stores';
+import { eventsAPI, authAPI, ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
 import type { TicketGroup } from '@/types';
 
@@ -18,8 +18,9 @@ export const SettingsPage: React.FC = () => {
     setDownloadedCount,
     clearEvent,
   } = useEventStore();
-  const { clearPendingScans, pendingScans, lastSyncTime } = useSyncStore();
+  const { clearPendingScans, pendingScans, lastSyncTime, isOnline, startSync, completeSync, failSync, removePendingScan } = useSyncStore();
   const { resetStats, clearHistory } = useScannerStore();
+  const { soundEnabled, vibrationEnabled, setSoundEnabled, setVibrationEnabled } = useSettingsStore();
 
   const [showTicketTypesModal, setShowTicketTypesModal] = useState(false);
   const [showClearDataModal, setShowClearDataModal] = useState(false);
@@ -31,6 +32,7 @@ export const SettingsPage: React.FC = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Get event ID from auth store
   const eventId = eventDetails?.event_id;
@@ -174,6 +176,64 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  // Sync pending scans to server
+  const handleSyncNow = async () => {
+    if (!isOnline) {
+      toast.warning('Offline', 'You need to be online to sync');
+      return;
+    }
+
+    if (pendingScans.length === 0) {
+      toast.info('Nothing to sync', 'All scans are already synced');
+      return;
+    }
+
+    if (!eventId || !deviceId) {
+      toast.error('Error', 'Missing event or device information');
+      return;
+    }
+
+    setIsSyncing(true);
+    startSync();
+
+    try {
+      let syncedCount = 0;
+      let failedCount = 0;
+
+      // Sync each pending scan
+      for (const scan of pendingScans) {
+        try {
+          await ticketsAPI.verify(
+            eventId,
+            scan.qrCode,
+            scan.deviceId,
+            selectedTicketTypes
+          );
+          removePendingScan(scan.id);
+          syncedCount++;
+        } catch (err) {
+          failedCount++;
+          // Continue with next scan
+        }
+      }
+
+      completeSync();
+      
+      if (syncedCount > 0 && failedCount === 0) {
+        toast.success('Sync Complete', `${syncedCount} scans synced successfully`);
+      } else if (syncedCount > 0 && failedCount > 0) {
+        toast.warning('Partial Sync', `${syncedCount} synced, ${failedCount} failed`);
+      } else if (failedCount > 0) {
+        toast.error('Sync Failed', `Failed to sync ${failedCount} scans`);
+      }
+    } catch (err) {
+      failSync('Sync failed');
+      toast.error('Sync Error', 'Failed to sync scans');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 pb-20">
       {/* Header */}
@@ -255,6 +315,67 @@ export const SettingsPage: React.FC = () => {
                   ? new Date(lastSyncTime).toLocaleString()
                   : 'Never'}
               </span>
+            </div>
+          </div>
+          {pendingScans.length > 0 && (
+            <Button
+              variant="primary"
+              size="sm"
+              fullWidth
+              className="mt-3"
+              onClick={handleSyncNow}
+              loading={isSyncing}
+              disabled={!isOnline}
+            >
+              {isOnline ? 'Sync Now' : 'Offline - Cannot Sync'}
+            </Button>
+          )}
+        </Card>
+
+        {/* Sound & Feedback Settings */}
+        <Card variant="elevated" padding="md">
+          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+            Sound & Feedback
+          </h2>
+          <div className="space-y-3">
+            <div 
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${soundEnabled ? 'bg-indigo-100' : 'bg-gray-100'}`}>
+                  <svg className={`w-5 h-5 ${soundEnabled ? 'text-indigo-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {soundEnabled ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                    )}
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Sound Effects</p>
+                  <p className="text-xs text-gray-500">Play sounds on scan results</p>
+                </div>
+              </div>
+              <Checkbox checked={soundEnabled} onChange={setSoundEnabled} />
+            </div>
+
+            <div 
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+              onClick={() => setVibrationEnabled(!vibrationEnabled)}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${vibrationEnabled ? 'bg-indigo-100' : 'bg-gray-100'}`}>
+                  <svg className={`w-5 h-5 ${vibrationEnabled ? 'text-indigo-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Vibration</p>
+                  <p className="text-xs text-gray-500">Haptic feedback on scan</p>
+                </div>
+              </div>
+              <Checkbox checked={vibrationEnabled} onChange={setVibrationEnabled} />
             </div>
           </div>
         </Card>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Badge } from '@/components/ui';
+import { Card, Badge, Button } from '@/components/ui';
 import { useScannerStore } from '@/stores';
 import { format } from 'date-fns';
 
@@ -30,12 +30,14 @@ export const HistoryPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-gray-900">Scan History</h1>
           {scanHistory.length > 0 && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={clearHistory}
-              className="text-sm text-red-500 hover:text-red-600"
+              className="text-red-500 hover:text-red-600"
             >
               Clear All
-            </button>
+            </Button>
           )}
         </div>
 

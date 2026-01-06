@@ -18,7 +18,7 @@ export const PWAUpdatePrompt: React.FC = () => {
   } = useRegisterSW({
     immediate: true,
     onRegistered(registration) {
-      console.log('SW Registered:', registration);
+      // SW Registered successfully
       // Check for updates every hour
       if (registration) {
         setInterval(() => {

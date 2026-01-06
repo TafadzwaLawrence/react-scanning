@@ -57,8 +57,12 @@ export const Modal: React.FC<ModalProps> = ({
       ref={overlayRef}
       onClick={handleOverlayClick}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
+      role="presentation"
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
         className={`
           ${sizes[size]} w-full bg-white rounded-2xl shadow-xl
           animate-slide-up m-4
@@ -67,11 +71,12 @@ export const Modal: React.FC<ModalProps> = ({
         {(title || showClose) && (
           <div className="flex items-center justify-between p-4 border-b">
             {title && (
-              <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+              <h2 id="modal-title" className="text-lg font-semibold text-gray-900">{title}</h2>
             )}
             {showClose && (
               <button
                 onClick={onClose}
+                aria-label="Close modal"
                 className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <svg

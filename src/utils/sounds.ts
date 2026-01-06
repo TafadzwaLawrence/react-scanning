@@ -17,7 +17,7 @@ export const initAudio = async (): Promise<void> => {
   try {
     await Tone.start();
     audioContextStarted = true;
-    console.log('Audio context started');
+    // Audio context started
   } catch (error) {
     console.error('Failed to start audio context:', error);
   }

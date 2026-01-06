@@ -12,6 +12,7 @@ import { ProtectedRoute } from '@/components/auth';
 import { BottomNav, OfflineIndicator } from '@/components/layout';
 import { ToastContainer } from '@/components/ui';
 import { PWAUpdatePrompt } from '@/components/pwa';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useSyncStore } from '@/stores';
 import { useThemeColor } from '@/hooks';
 
@@ -111,9 +112,11 @@ function AppContent() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

@@ -137,14 +137,14 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
             const state = scannerRef.current.getState();
             // State 2 = SCANNING, if not scanning, restart
             if (state !== 2) {
-              console.log('Camera not running, restarting...');
+              // Camera not running, restarting
               isRestartingRef.current = true;
               await startScanner();
               isRestartingRef.current = false;
             }
           } catch {
             // Scanner may be in bad state, restart it
-            console.log('Scanner state error, restarting...');
+            // Scanner state error, restarting
             isRestartingRef.current = true;
             await startScanner();
             isRestartingRef.current = false;
@@ -258,11 +258,12 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
         <div className="absolute bottom-4 left-0 right-0 flex justify-center">
           <button
             onClick={toggleFlash}
+            aria-label={isFlashOn ? 'Turn off flashlight' : 'Turn on flashlight'}
             className={`p-3 rounded-full transition-colors ${
               isFlashOn ? 'bg-amber-500 text-white' : 'bg-white/20 text-white backdrop-blur'
             }`}
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </button>

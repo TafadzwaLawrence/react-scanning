@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRScanner, ScanResultDisplay, ScanStats, CameraPermission } from '@/components/scanner';
-import { Badge, Button, Card } from '@/components/ui';
-import { useAuthStore, useEventStore, useScannerStore, useSyncStore, useToast } from '@/stores';
+import { Badge, Button, Card, Input, Modal } from '@/components/ui';
+import { useAuthStore, useEventStore, useScannerStore, useSyncStore, useSettingsStore, useToast } from '@/stores';
 import { ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
 import { generateUUID } from '@/utils';
@@ -17,8 +17,12 @@ export const ScannerPage: React.FC = () => {
   const { selectedTicketTypes } = useEventStore();
   const { stats, addScanResult, lastScanResult, clearLastResult } = useScannerStore();
   const { isOnline, addPendingScan, totalScans, syncedScans } = useSyncStore();
+  const { soundEnabled, vibrationEnabled } = useSettingsStore();
 
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [manualCode, setManualCode] = useState('');
+  const [isManualProcessing, setIsManualProcessing] = useState(false);
   
   // Use refs for processing state - NO STATE CHANGES = NO CAMERA RESTART
   const isProcessingRef = useRef(false);
@@ -48,8 +52,9 @@ export const ScannerPage: React.FC = () => {
     };
   }, []);
 
-  // Vibrate helper
+  // Vibrate helper - respects settings
   const vibrate = useCallback((pattern: number | number[]) => {
+    if (!vibrationEnabled) return;
     if ('vibrate' in navigator) {
       try {
         navigator.vibrate(pattern);
@@ -57,7 +62,15 @@ export const ScannerPage: React.FC = () => {
         // Ignore
       }
     }
-  }, []);
+  }, [vibrationEnabled]);
+
+  // Play sound helper - respects settings
+  const playSound = useCallback((type: 'success' | 'failure' | 'warning') => {
+    if (!soundEnabled) return;
+    if (type === 'success') SoundPlayer.success();
+    else if (type === 'failure') SoundPlayer.failure();
+    else if (type === 'warning') SoundPlayer.warning();
+  }, [soundEnabled]);
 
   const handleScan = useCallback(
     async (qrCode: string) => {
@@ -95,7 +108,7 @@ export const ScannerPage: React.FC = () => {
           );
 
           if (response.status === 200) {
-            SoundPlayer.success();
+            playSound('success');
             vibrate(100);
             resultType = 'valid';
             message = 'Ticket validated';
@@ -106,7 +119,7 @@ export const ScannerPage: React.FC = () => {
             };
             db.markAsScanned(qrCode, deviceId).catch(console.error);
           } else if (response.status === 403) {
-            SoundPlayer.failure();
+            playSound('failure');
             vibrate([50, 30, 50]);
             if ('scanned_at' in response) {
               resultType = 'used';
@@ -120,12 +133,12 @@ export const ScannerPage: React.FC = () => {
               message = (response as any).message || 'Invalid';
             }
           } else if (response.status === 404) {
-            SoundPlayer.failure();
+            playSound('failure');
             vibrate([50, 30, 50]);
             resultType = 'invalid';
             message = 'Not found';
           } else {
-            SoundPlayer.failure();
+            playSound('failure');
             vibrate([50, 30, 50]);
             resultType = 'error';
             message = (response as any).message || 'Error';
@@ -134,18 +147,18 @@ export const ScannerPage: React.FC = () => {
           const localTicket = await db.getTicketByQRCode(qrCode);
           if (localTicket) {
             if (localTicket.log_count > 0) {
-              SoundPlayer.warning();
+              playSound('warning');
               vibrate([50, 30, 50]);
               resultType = 'used';
               message = 'Already scanned';
               ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
             } else if (selectedTicketTypes.length > 0 && !selectedTicketTypes.includes(localTicket.ticket_type)) {
-              SoundPlayer.failure();
+              playSound('failure');
               vibrate([50, 30, 50]);
               resultType = 'wrong-type';
               message = `Type: ${localTicket.ticket_type}`;
             } else {
-              SoundPlayer.success();
+              playSound('success');
               vibrate(100);
               resultType = 'valid';
               message = 'Offline validated';
@@ -154,14 +167,14 @@ export const ScannerPage: React.FC = () => {
               addPendingScan({ qrCode, deviceId, scannedAt: Date.now() });
             }
           } else {
-            SoundPlayer.failure();
+            playSound('failure');
             vibrate([50, 30, 50]);
             resultType = 'invalid';
             message = 'Not in database';
           }
         }
       } catch (err) {
-        SoundPlayer.failure();
+        playSound('failure');
         vibrate([50, 30, 50]);
         
         if (err instanceof AxiosError && err.response?.data) {
@@ -206,12 +219,27 @@ export const ScannerPage: React.FC = () => {
         isProcessingRef.current = false;
       }, 300);
     },
-    [eventId, deviceId, selectedTicketTypes, isOnline, toast, vibrate, addScanResult, addPendingScan]
+    [eventId, deviceId, selectedTicketTypes, isOnline, toast, vibrate, playSound, addScanResult, addPendingScan]
   );
 
   const handleDismissResult = useCallback(() => {
     clearLastResult();
   }, [clearLastResult]);
+
+  // Handle manual ticket entry
+  const handleManualSubmit = useCallback(async () => {
+    const code = manualCode.trim();
+    if (!code) {
+      toast.warning('Empty Code', 'Please enter a ticket code');
+      return;
+    }
+    
+    setIsManualProcessing(true);
+    await handleScan(code);
+    setIsManualProcessing(false);
+    setManualCode('');
+    setShowManualEntry(false);
+  }, [manualCode, handleScan, toast]);
 
   // Setup online/offline listener
   useEffect(() => {
@@ -292,7 +320,72 @@ export const ScannerPage: React.FC = () => {
           onScan={handleScan}
           onError={(error) => toast.error('Camera Error', error)}
         />
+        
+        {/* Manual Entry Button */}
+        <div className="absolute bottom-20 left-0 right-0 flex justify-center">
+          <button
+            onClick={() => setShowManualEntry(true)}
+            aria-label="Enter ticket code manually"
+            className="bg-white/90 backdrop-blur text-gray-700 px-4 py-2 rounded-full text-sm font-medium shadow-lg flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Enter Manually
+          </button>
+        </div>
       </div>
+
+      {/* Manual Entry Modal */}
+      <Modal
+        isOpen={showManualEntry}
+        onClose={() => setShowManualEntry(false)}
+        title="Manual Ticket Entry"
+        size="md"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Enter the ticket code or QR code value manually if the scanner cannot read it.
+          </p>
+          <Input
+            label="Ticket Code"
+            placeholder="Enter ticket code..."
+            value={manualCode}
+            onChange={(e) => setManualCode(e.target.value)}
+            disabled={isManualProcessing}
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !isManualProcessing) {
+                handleManualSubmit();
+              }
+            }}
+            leftIcon={
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+              </svg>
+            }
+          />
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="ghost"
+              onClick={() => setShowManualEntry(false)}
+              className="flex-1"
+              disabled={isManualProcessing}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleManualSubmit}
+              loading={isManualProcessing}
+              className="flex-1"
+              disabled={!manualCode.trim()}
+            >
+              Verify Ticket
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Result Overlay */}
       <ScanResultDisplay
