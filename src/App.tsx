@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import {
   LoginPage,
@@ -9,7 +9,7 @@ import {
   SettingsPage,
 } from '@/pages';
 import { ProtectedRoute } from '@/components/auth';
-import { BottomNav, OfflineIndicator } from '@/components/layout';
+import { BottomNav, OfflineIndicator, SplashScreen } from '@/components/layout';
 import { ToastContainer } from '@/components/ui';
 import { PWAUpdatePrompt } from '@/components/pwa';
 import { useSyncStore } from '@/stores';
@@ -24,6 +24,7 @@ function ThemeColorManager() {
 function AppContent() {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
+  const [showSplash, setShowSplash] = useState(true);
 
   // Setup online/offline listeners
   useEffect(() => {
@@ -44,8 +45,16 @@ function AppContent() {
     };
   }, []);
 
+  // Handle splash screen finish
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+  };
+
   return (
     <>
+      {/* Splash Screen */}
+      {showSplash && <SplashScreen onFinish={handleSplashFinish} duration={2500} />}
+      
       <ThemeColorManager />
       <div className="min-h-screen bg-gray-100">
         <OfflineIndicator />
