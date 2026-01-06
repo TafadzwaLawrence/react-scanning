@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useSound from 'use-sound';
 import { QRScanner, ScanResultDisplay, ScanStats, CameraPermission } from '@/components/scanner';
 import { Badge, Button, Card } from '@/components/ui';
 import { useAuthStore, useEventStore, useScannerStore, useSyncStore, useToast } from '@/stores';
 import { ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
 import { generateUUID } from '@/utils';
+import { SoundPlayer } from '@/utils/sounds';
 import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -20,10 +20,6 @@ export const ScannerPage: React.FC = () => {
 
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
   
-  // use-sound hooks - reliable audio playback with sprite support
-  const [playSuccess] = useSound('/sounds/success.mp3', { volume: 1 });
-  const [playFailure] = useSound('/sounds/failure.mp3', { volume: 1 });
-  
   // Use refs for processing state - NO STATE CHANGES = NO CAMERA RESTART
   const isProcessingRef = useRef(false);
   const lastScanTimeRef = useRef(0);
@@ -34,6 +30,23 @@ export const ScannerPage: React.FC = () => {
 
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
+
+  // Initialize audio on first user interaction
+  useEffect(() => {
+    const initAudioOnInteraction = () => {
+      SoundPlayer.init();
+      document.removeEventListener('touchstart', initAudioOnInteraction);
+      document.removeEventListener('click', initAudioOnInteraction);
+    };
+    
+    document.addEventListener('touchstart', initAudioOnInteraction, { once: true });
+    document.addEventListener('click', initAudioOnInteraction, { once: true });
+    
+    return () => {
+      document.removeEventListener('touchstart', initAudioOnInteraction);
+      document.removeEventListener('click', initAudioOnInteraction);
+    };
+  }, []);
 
   // Vibrate helper
   const vibrate = useCallback((pattern: number | number[]) => {
@@ -82,7 +95,7 @@ export const ScannerPage: React.FC = () => {
           );
 
           if (response.status === 200) {
-            playSuccess();
+            SoundPlayer.success();
             vibrate(100);
             resultType = 'valid';
             message = 'Ticket validated';
@@ -93,7 +106,7 @@ export const ScannerPage: React.FC = () => {
             };
             db.markAsScanned(qrCode, deviceId).catch(console.error);
           } else if (response.status === 403) {
-            playFailure();
+            SoundPlayer.failure();
             vibrate([50, 30, 50]);
             if ('scanned_at' in response) {
               resultType = 'used';
@@ -107,12 +120,12 @@ export const ScannerPage: React.FC = () => {
               message = (response as any).message || 'Invalid';
             }
           } else if (response.status === 404) {
-            playFailure();
+            SoundPlayer.failure();
             vibrate([50, 30, 50]);
             resultType = 'invalid';
             message = 'Not found';
           } else {
-            playFailure();
+            SoundPlayer.failure();
             vibrate([50, 30, 50]);
             resultType = 'error';
             message = (response as any).message || 'Error';
@@ -121,18 +134,18 @@ export const ScannerPage: React.FC = () => {
           const localTicket = await db.getTicketByQRCode(qrCode);
           if (localTicket) {
             if (localTicket.log_count > 0) {
-              playFailure();
+              SoundPlayer.warning();
               vibrate([50, 30, 50]);
               resultType = 'used';
               message = 'Already scanned';
               ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
             } else if (selectedTicketTypes.length > 0 && !selectedTicketTypes.includes(localTicket.ticket_type)) {
-              playFailure();
+              SoundPlayer.failure();
               vibrate([50, 30, 50]);
               resultType = 'wrong-type';
               message = `Type: ${localTicket.ticket_type}`;
             } else {
-              playSuccess();
+              SoundPlayer.success();
               vibrate(100);
               resultType = 'valid';
               message = 'Offline validated';
@@ -141,14 +154,14 @@ export const ScannerPage: React.FC = () => {
               addPendingScan({ qrCode, deviceId, scannedAt: Date.now() });
             }
           } else {
-            playFailure();
+            SoundPlayer.failure();
             vibrate([50, 30, 50]);
             resultType = 'invalid';
             message = 'Not in database';
           }
         }
       } catch (err) {
-        playFailure();
+        SoundPlayer.failure();
         vibrate([50, 30, 50]);
         
         if (err instanceof AxiosError && err.response?.data) {
@@ -193,7 +206,7 @@ export const ScannerPage: React.FC = () => {
         isProcessingRef.current = false;
       }, 300);
     },
-    [eventId, deviceId, selectedTicketTypes, isOnline, toast, playSuccess, playFailure, vibrate, addScanResult, addPendingScan]
+    [eventId, deviceId, selectedTicketTypes, isOnline, toast, vibrate, addScanResult, addPendingScan]
   );
 
   const handleDismissResult = useCallback(() => {

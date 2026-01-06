@@ -14,3 +14,11 @@ export {
   generateEncryptionKey,
   RateLimiter,
 } from './security';
+export {
+  SoundPlayer,
+  playSuccessSound,
+  playFailureSound,
+  playWarningSound,
+  playBeep,
+  initAudio,
+} from './sounds';
