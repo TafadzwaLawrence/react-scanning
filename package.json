@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "generate-favicons": "node ./scripts/generate-png-favicons.cjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -36,6 +37,7 @@
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
-    "vite-plugin-pwa": "^1.2.0"
+    "vite-plugin-pwa": "^1.2.0",
+    "sharp": "^0.32.1"
   }
 }

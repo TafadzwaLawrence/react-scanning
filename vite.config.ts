@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'icons/*.svg', 'sounds/*.mp3'],
+    registerType: 'autoUpdate',
+    includeAssets: ['favicon.ico', 'icons/*.png', 'icons/*.svg', 'sounds/*.mp3'],
       manifest: {
         name: '263tickets Scanner',
         short_name: 'Scanner',
