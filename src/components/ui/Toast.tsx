@@ -18,14 +18,14 @@ const ToastItem: React.FC<{ toast: ToastType; onClose: () => void }> = ({
       title: 'text-red-800',
     },
     warning: {
-      bg: 'bg-amber-50 border-amber-200',
-      icon: 'text-amber-500',
-      title: 'text-amber-800',
+      bg: 'bg-primary/10 border-primary/20',
+      icon: 'text-primary',
+      title: 'text-text-primary',
     },
     info: {
-      bg: 'bg-blue-50 border-blue-200',
-      icon: 'text-blue-500',
-      title: 'text-blue-800',
+      bg: 'bg-secondary/10 border-secondary/20',
+      icon: 'text-secondary',
+      title: 'text-text-primary',
     },
   };
 
@@ -58,8 +58,10 @@ const ToastItem: React.FC<{ toast: ToastType; onClose: () => void }> = ({
     <div
       className={`
         ${style.bg} border rounded-lg p-4 shadow-lg
-        animate-slide-up max-w-sm w-full
+        animate-slide-up max-w-sm w-full bg-opacity-100
       `}
+      role="status"
+      aria-live="polite"
     >
       <div className="flex items-start gap-3">
         <span className={style.icon}>{icons[toast.type]}</span>

@@ -16,9 +16,9 @@ export const Card: React.FC<CardProps> = ({
   className = '',
 }) => {
   const variants = {
-    elevated: 'bg-white shadow-md hover:shadow-lg',
-    outlined: 'bg-white border border-gray-200',
-    filled: 'bg-gray-100',
+    elevated: 'bg-surface border border-transparent hover:shadow-subtle',
+    outlined: 'bg-surface border border-border',
+    filled: 'bg-gray-50',
   };
 
   const paddings = {

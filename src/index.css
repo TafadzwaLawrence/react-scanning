@@ -2,19 +2,18 @@
 
 /* Custom CSS Variables based on design specs */
 :root {
-  /* Primary Brand Colors */
-  --color-primary: #6366F1;
-  --color-primary-light: #818CF8;
-  --color-primary-dark: #4F46E5;
-  
-  /* Secondary Colors */
-  --color-secondary: #8B5CF6;
-  --color-secondary-light: #A78BFA;
-  --color-secondary-dark: #7C3AED;
-  
-  /* Accent */
-  --color-accent: #F59E0B;
-  
+  /* Brand Colors (minimalistic) */
+  --color-primary: #ff6600; /* primary CTA / accent */
+  --color-primary-light: #ff8a33;
+  --color-primary-dark: #cc5200;
+
+  --color-secondary: #00007c; /* secondary accent */
+  --color-secondary-light: #2a2a9a;
+  --color-secondary-dark: #00005a;
+
+  /* Accent maps to primary */
+  --color-accent: var(--color-primary);
+
   /* Status Colors */
   --color-success: #10B981;
   --color-success-light: #D1FAE5;
@@ -24,22 +23,23 @@
   --color-error-light: #FEE2E2;
   --color-info: #3B82F6;
   --color-info-light: #DBEAFE;
-  
+
   /* Scan Result Colors */
   --color-valid: #10B981;
   --color-used: #F97316;
   --color-invalid: #EF4444;
-  
-  /* Neutrals */
-  --color-background: #F9FAFB;
+
+  /* Neutrals (flat, lots of white + black accents) */
+  --color-background: #FFFFFF;
   --color-surface: #FFFFFF;
-  --color-border: #E5E7EB;
-  
+  --color-border: #E6E6E6;
+  --color-black: #0B0B0B;
+
   /* Text */
-  --color-text-primary: #111827;
+  --color-text-primary: var(--color-black);
   --color-text-secondary: #6B7280;
   --color-text-disabled: #9CA3AF;
-  
+
   /* Typography */
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;

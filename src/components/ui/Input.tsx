@@ -29,9 +29,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-text-primary mb-1">
             {label}
-            {props.required && <span className="text-red-500 ml-1">*</span>}
+            {props.required && <span className="text-primary ml-1">*</span>}
           </label>
         )}
         <div className="relative">
@@ -46,14 +46,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             className={`
               w-full px-4 py-3 text-base
               border rounded-lg transition-all duration-150
-              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
+              focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-transparent
               disabled:bg-gray-100 disabled:cursor-not-allowed
               ${leftIcon ? 'pl-10' : ''}
               ${rightIcon || type === 'password' ? 'pr-10' : ''}
               ${
                 error
                   ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 hover:border-gray-400'
+                  : 'border-border hover:border-text-primary/40'
               }
               ${className}
             `}
