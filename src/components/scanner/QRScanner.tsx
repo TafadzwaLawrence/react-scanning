@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState, memo } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 interface QRScannerProps {
-  onScan: (qrCode: string) => void;
+  // onScan may return a Promise so the scanner can await completion
+  onScan: (qrCode: string) => void | Promise<any>;
   onError?: (error: string) => void;
 }
 
@@ -26,8 +27,10 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Store callbacks in refs - updates don't cause re-renders
-  const onScanRef = useRef(onScan);
-  const onErrorRef = useRef(onError);
+  type OnScanHandler = (qrCode: string) => void | Promise<any>;
+  const onScanRef = useRef<OnScanHandler>(onScan);
+  const onErrorRef = useRef<any>(onError);
+  const isHandlingRef = useRef(false);
   
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hasFlash, setHasFlash] = useState(false);
@@ -104,11 +107,31 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
             aspectRatio: 1,
             disableFlip: false,
           },
-          (decodedText) => {
-            setScanFlash(true);
-            setTimeout(() => setScanFlash(false), 120);
-            vibrate();
-            onScanRef.current(decodedText);
+          async (decodedText) => {
+            // Prevent concurrent processing of multiple detections
+            if (isHandlingRef.current) return;
+            isHandlingRef.current = true;
+
+            try {
+              setScanFlash(true);
+              setTimeout(() => setScanFlash(false), 120);
+              vibrate();
+
+              const result = onScanRef.current(decodedText);
+              // If handler returns a promise, await it so we pause until validation completes
+              if (result && typeof (result as any).then === 'function') {
+                try {
+                  await (result as Promise<any>);
+                } catch (e) {
+                  // swallow - ScannerPage handles errors
+                }
+              }
+
+              // Short cooldown after processing to avoid immediate re-detects
+              await new Promise((r) => setTimeout(r, 700));
+            } finally {
+              isHandlingRef.current = false;
+            }
           },
           () => {}
         );
