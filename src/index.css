@@ -74,6 +74,36 @@ body {
   flex-direction: column;
 }
 
+/* Skip link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  left: 16px;
+  top: 16px;
+  width: auto;
+  height: auto;
+  padding: 8px 12px;
+  background: var(--color-secondary);
+  color: white;
+  border-radius: 6px;
+  z-index: 9999;
+}
+
+/* Focus-visible improvements for keyboard users */
+:where(button, a, input, select, textarea) :focus-visible {
+  outline: none;
+}
+:where(button, a, input, select, textarea):focus-visible {
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08), 0 0 0 5px var(--color-primary);
+  border-radius: 6px;
+}
+
 /* Custom Utilities */
 @layer utilities {
   .font-mono {

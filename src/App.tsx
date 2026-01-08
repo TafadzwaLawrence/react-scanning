@@ -47,7 +47,7 @@ function AppContent() {
   return (
     <>
       <ThemeColorManager />
-      <div className="min-h-screen bg-gray-100">
+      <div id="main" className="min-h-screen bg-gray-100">
         <OfflineIndicator />
         <ToastContainer />
         <PWAUpdatePrompt />
