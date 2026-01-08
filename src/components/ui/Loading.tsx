@@ -21,7 +21,7 @@ export const Loading: React.FC<LoadingProps> = ({
   const spinner = (
     <div className="flex flex-col items-center justify-center gap-3">
       <svg
-        className={`animate-spin text-indigo-500 ${sizes[size]}`}
+        className={`animate-spin text-secondary ${sizes[size]}`}
         fill="none"
         viewBox="0 0 24 24"
       >

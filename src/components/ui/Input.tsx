@@ -26,12 +26,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     const inputType = type === 'password' && showPassword ? 'text' : type;
 
+    const inputId = props.id || props.name || undefined;
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-text-primary mb-1">
+          <label htmlFor={inputId} className="block text-sm font-medium text-text-primary mb-1">
             {label}
-            {props.required && <span className="text-primary ml-1">*</span>}
+            {props.required && <span className="text-primary ml-1" aria-hidden="true">*</span>}
           </label>
         )}
         <div className="relative">
@@ -42,7 +43,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             ref={ref}
+            id={inputId}
             type={inputType}
+            aria-invalid={!!error}
+            aria-describedby={error || helperText ? `${inputId}-hint` : undefined}
             className={`
               w-full px-4 py-3 text-base
               border rounded-lg transition-all duration-150
@@ -111,9 +115,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
         {(error || helperText) && (
           <p
+            id={inputId ? `${inputId}-hint` : undefined}
             className={`mt-1 text-sm ${
               error ? 'text-red-500' : 'text-gray-500'
             }`}
+            role={error ? 'alert' : undefined}
           >
             {error || helperText}
           </p>

@@ -41,7 +41,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
             flex items-center justify-center
             ${
               checked
-                ? 'bg-indigo-500 border-indigo-500'
+                ? 'bg-secondary border-secondary'
                 : 'bg-white border-gray-300 hover:border-gray-400'
             }
           `}

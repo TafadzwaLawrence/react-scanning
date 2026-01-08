@@ -302,7 +302,7 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
           
           {/* Scan line */}
           {!scanFlash && (
-            <div className="absolute inset-x-4 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-indigo-400 to-transparent animate-pulse" />
+            <div className="absolute inset-x-4 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" />
           )}
         </div>
       </div>

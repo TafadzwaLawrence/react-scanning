@@ -60,8 +60,8 @@ const ToastItem: React.FC<{ toast: ToastType; onClose: () => void }> = ({
         ${style.bg} border rounded-lg p-4 shadow-lg
         animate-slide-up max-w-sm w-full bg-opacity-100
       `}
-      role="status"
-      aria-live="polite"
+      role={toast.type === 'error' ? 'alert' : 'status'}
+      aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
     >
       <div className="flex items-start gap-3">
         <span className={style.icon}>{icons[toast.type]}</span>

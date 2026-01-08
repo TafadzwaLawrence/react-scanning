@@ -264,7 +264,7 @@ export const ReportsPage: React.FC = () => {
                     {/* Mini progress bar */}
                     <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-indigo-500 rounded-full"
+                        className="h-full bg-primary rounded-full"
                         style={{ width: `${Math.min(data.scan_rate, 100)}%` }}
                       />
                     </div>

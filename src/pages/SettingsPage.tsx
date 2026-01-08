@@ -453,7 +453,7 @@ export const SettingsPage: React.FC = () => {
                     p-3 rounded-lg border cursor-pointer transition-colors
                     ${
                       tempSelectedTypes.includes(group.type)
-                        ? 'border-indigo-500 bg-indigo-50'
+                        ? 'border-secondary bg-secondary/10'
                         : 'border-gray-200 hover:border-gray-300'
                     }
                   `}

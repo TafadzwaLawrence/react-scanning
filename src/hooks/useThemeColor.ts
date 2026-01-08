@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 // Theme colors to match page headers
 const routeThemeColors: Record<string, string> = {
-  '/login': '#6366F1', // Indigo - matches login gradient
+  '/login': '#00007c', // Secondary brand color - navy blue
 };
 
 // White for all authenticated pages with white headers

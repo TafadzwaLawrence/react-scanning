@@ -64,8 +64,8 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
       title: 'WRONG TYPE',
     },
     offline: {
-      bg: 'bg-indigo-500',
-      border: 'border-indigo-400',
+      bg: 'bg-secondary',
+      border: 'border-secondary/80',
       icon: (
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0" />
