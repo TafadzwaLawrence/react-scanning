@@ -19,7 +19,10 @@ export const ScannerPage: React.FC = () => {
   const { isOnline, addPendingScan, totalScans, syncedScans } = useSyncStore();
   const { soundEnabled, vibrationEnabled } = useSettingsStore();
 
-  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
+  // Check if we've previously granted permission (persisted in sessionStorage)
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(() => {
+    return sessionStorage.getItem('cameraPermissionGranted') === 'true';
+  });
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [manualCode, setManualCode] = useState('');
   const [isManualProcessing, setIsManualProcessing] = useState(false);
@@ -259,6 +262,7 @@ export const ScannerPage: React.FC = () => {
   // Handle camera permission granted
   const handlePermissionGranted = useCallback(() => {
     setCameraPermissionGranted(true);
+    sessionStorage.setItem('cameraPermissionGranted', 'true');
   }, []);
 
   // Show setup required screen if no event ID

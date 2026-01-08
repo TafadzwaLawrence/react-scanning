@@ -29,6 +29,13 @@ export const CameraPermission: React.FC<CameraPermissionProps> = ({ onPermission
     setStatus('checking');
     setErrorMessage(null);
 
+    // If we've already granted permission this session, skip the check
+    if (sessionStorage.getItem('cameraPermissionGranted') === 'true') {
+      setStatus('granted');
+      onPermissionGranted();
+      return;
+    }
+
     // Check if we're in a secure context (HTTPS or localhost)
     // iOS Safari requires HTTPS for camera access
     const isSecure = window.isSecureContext || window.location.hostname === 'localhost';
