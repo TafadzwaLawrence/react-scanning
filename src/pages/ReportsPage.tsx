@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge, Loading } from '@/components/ui';
+import { Card, Button, Badge, Loading, Skeleton } from '@/components/ui';
 import { useAuthStore, useSyncStore, useToast } from '@/stores';
 import { reportsAPI } from '@/services/api';
 import type { ReconciliationReport } from '@/types';
@@ -97,9 +97,37 @@ export const ReportsPage: React.FC = () => {
 
       <div className="p-4 space-y-4">
         {isLoading && !report ? (
-          <div className="flex items-center justify-center py-20">
-            <Loading size="lg" message="Loading report..." />
-          </div>
+          <>
+            <Card variant="elevated" padding="md">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-sm font-semibold text-text-secondary">Reconciliation Report</h2>
+                <div className="w-12">
+                  <Skeleton height="h-4" />
+                </div>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-4">
+                <div className="p-3 bg-surface rounded-lg">
+                  <Skeleton height="h-8" />
+                  <div className="mt-2"><Skeleton /></div>
+                </div>
+                <div className="p-3 bg-surface rounded-lg">
+                  <Skeleton height="h-8" />
+                  <div className="mt-2"><Skeleton /></div>
+                </div>
+                <div className="p-3 bg-surface rounded-lg">
+                  <Skeleton height="h-8" />
+                  <div className="mt-2"><Skeleton /></div>
+                </div>
+                <div className="p-3 bg-surface rounded-lg">
+                  <Skeleton height="h-8" />
+                  <div className="mt-2"><Skeleton /></div>
+                </div>
+              </div>
+            </Card>
+            <Card variant="elevated" padding="md">
+              <Skeleton height="h-48" />
+            </Card>
+          </>
         ) : error && !report ? (
           <Card variant="elevated" padding="lg" className="text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">

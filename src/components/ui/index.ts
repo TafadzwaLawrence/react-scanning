@@ -4,5 +4,6 @@ export { Card } from './Card';
 export { Badge } from './Badge';
 export { Modal } from './Modal';
 export { Loading } from './Loading';
+export { Skeleton } from './Skeleton';
 export { ToastContainer } from './Toast';
 export { Checkbox } from './Checkbox';
