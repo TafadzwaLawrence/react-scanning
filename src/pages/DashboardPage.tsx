@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Badge, Loading, Skeleton } from '@/components/ui';
+import { Card, Button, Badge, Skeleton } from '@/components/ui';
 import { useAuthStore, useEventStore, useSyncStore } from '@/stores';
 import { db } from '@/services/db';
 import { format } from 'date-fns';
