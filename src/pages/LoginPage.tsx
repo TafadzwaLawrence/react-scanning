@@ -159,8 +159,15 @@ export const LoginPage: React.FC = () => {
             <p id="login-help">Don't have event credentials? Contact your event organiser or visit the event dashboard.</p>
           </div>
 
-          <div className="mt-6 text-center text-xs text-muted">
-            <p>Device ID: <span className="font-mono">{deviceId}</span></p>
+          <div className="mt-6 text-center">
+            <p className="text-xs text-muted">Device ID: <span className="font-mono">{deviceId}</span></p>
+
+            <div className="mt-2 flex items-center justify-center gap-2 text-sm">
+              <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
+              <span className={isOnline ? 'text-emerald-600' : 'text-red-600'}>
+                {isOnline ? 'Connected' : 'Offline'}
+              </span>
+            </div>
           </div>
         </Card>
 
