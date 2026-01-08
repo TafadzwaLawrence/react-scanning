@@ -67,23 +67,26 @@ export const BottomNav: React.FC = () => {
   return (
     <nav aria-label="Main navigation" role="navigation" className="fixed bottom-0 left-0 right-0 bg-surface border-t border-border pb-safe z-40">
       <div className="flex items-center justify-around max-w-lg mx-auto">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            aria-current={location.pathname === item.path ? 'page' : undefined}
-            className={({ isActive }) =>
-              `flex flex-col items-center py-2 px-4 min-w-[64px] transition-colors ${
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              aria-current={isActive ? 'page' : undefined}
+              className={`flex flex-col items-center py-2 px-4 min-w-[64px] transition-colors ${
                 isActive
                   ? 'text-primary'
-                  : 'text-gray-500 hover:text-text-primary/80'
-              }`
-            }
-          >
-            <div className="text-current">{item.icon}</div>
-            <span className="text-xs mt-1 font-medium text-text-primary">{item.label}</span>
-          </NavLink>
-        ))}
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              <div className="text-current">{item.icon}</div>
+              {!isActive && (
+                <span className="text-xs mt-1 font-medium">{item.label}</span>
+              )}
+            </NavLink>
+          );
+        })}
       </div>
     </nav>
   );
