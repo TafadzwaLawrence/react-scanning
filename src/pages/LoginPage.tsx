@@ -148,7 +148,7 @@ export const LoginPage: React.FC = () => {
               fullWidth
               size="lg"
               loading={isLoading}
-              className="bg-primary text-white hover:bg-primary/90"
+              className="bg-black text-white hover:bg-black/90"
               aria-label="Login to event"
             >
               Login to Event
