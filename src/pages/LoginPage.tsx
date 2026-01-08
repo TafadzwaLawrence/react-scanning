@@ -17,6 +17,7 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const from = location.state?.from?.pathname || '/dashboard';
 
@@ -70,99 +71,103 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 to-violet-600 p-4">
-      <Card className="w-full max-w-md" padding="lg">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Scan</h1>
-          <p className="text-gray-500 mt-1">Ticket Scanner by 263tickets</p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Event Code"
-            placeholder="Enter event code"
-            value={eventCode}
-            onChange={(e) => setEventCode(e.target.value)}
-            disabled={isLoading}
-            leftIcon={
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-              </svg>
-            }
-          />
-
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            leftIcon={
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            }
-          />
-
-          <Checkbox
-            checked={rememberMe}
-            onChange={setRememberMe}
-            label="Remember me"
-          />
-
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 animate-shake">
-              {error}
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <div className="w-full max-w-md">
+        <Card className="overflow-visible" padding="lg">
+          <div className="-mt-12 mb-6 flex justify-center">
+            <div className="w-24 h-24 rounded-3xl bg-secondary flex items-center justify-center shadow-lg">
+              <img src="/icons/icon-192.svg" alt="263tickets" className="w-12 h-12" />
             </div>
-          )}
+          </div>
 
-          <Button
-            type="submit"
-            fullWidth
-            size="lg"
-            loading={isLoading}
-            leftIcon={
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-            }
-          >
-            Login to Event
-          </Button>
-        </form>
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-semibold text-text-primary">Welcome to 263tickets</h1>
+            <p className="text-sm text-text-secondary mt-1">Sign in with your event credentials to begin scanning</p>
+          </div>
 
-        {/* Connection Status */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-sm">
-          <span
-            className={`w-2 h-2 rounded-full ${
-              isOnline ? 'bg-emerald-500' : 'bg-red-500'
-            }`}
-          />
-          <span className={isOnline ? 'text-emerald-600' : 'text-red-600'}>
-            {isOnline ? 'Connected' : 'Offline'}
-          </span>
+          <form onSubmit={handleSubmit} className="space-y-4" aria-describedby="login-help">
+            <Input
+              label="Event Code"
+              placeholder="e.g. MTN-FEST-2026"
+              value={eventCode}
+              onChange={(e) => setEventCode(e.target.value)}
+              disabled={isLoading}
+              autoFocus
+              aria-label="Event code"
+              leftIcon={
+                <svg className="w-5 h-5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                </svg>
+              }
+            />
+
+            <div>
+              <Input
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                aria-label="Password"
+                leftIcon={
+                  <svg className="w-5 h-5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                }
+              />
+
+              <div className="mt-2 flex items-center justify-between text-sm">
+                <label className="inline-flex items-center gap-2">
+                  <Checkbox
+                    checked={rememberMe}
+                    onChange={setRememberMe}
+                    label="Remember me"
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  className="text-sm text-text-secondary hover:text-text-primary"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? 'Hide' : 'Show'} password
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              fullWidth
+              size="lg"
+              loading={isLoading}
+              className="bg-primary text-white hover:bg-primary/90"
+              aria-label="Login to event"
+            >
+              Login to Event
+            </Button>
+          </form>
+
+          <div className="mt-5 text-center text-sm text-text-secondary">
+            <p id="login-help">Don't have event credentials? Contact your event organiser or visit the event dashboard.</p>
+          </div>
+
+          <div className="mt-6 text-center text-xs text-muted">
+            <p>Device ID: <span className="font-mono">{deviceId}</span></p>
+          </div>
+        </Card>
+
+        <div className="mt-6 text-center text-sm text-text-secondary">
+          <p>© 2026 263tickets • v1.0.0</p>
         </div>
-
-        {/* Device ID */}
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-400">
-            Device ID: <span className="font-mono">{deviceId}</span>
-          </p>
-        </div>
-      </Card>
-
-      {/* Footer */}
-      <p className="mt-6 text-sm text-white/70">
-        © 2026 263tickets • v1.0.0
-      </p>
+      </div>
     </div>
   );
 };
