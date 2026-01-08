@@ -1,5 +1,23 @@
 @import 'tailwindcss';
 
+/* Tailwind 4.x Theme Configuration */
+@theme {
+  --color-primary: #ff6600;
+  --color-primary-light: #ff8a33;
+  --color-primary-dark: #cc5200;
+  --color-secondary: #00007c;
+  --color-secondary-light: #2a2a9a;
+  --color-secondary-dark: #00005a;
+  --color-surface: #FFFFFF;
+  --color-border: #E6E6E6;
+  --color-text-primary: #0B0B0B;
+  --color-text-secondary: #6B7280;
+  --color-black: #0B0B0B;
+  
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 /* Custom CSS Variables based on design specs */
 :root {
   /* Brand Colors (minimalistic) */
