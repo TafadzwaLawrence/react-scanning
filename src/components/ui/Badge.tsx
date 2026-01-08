@@ -14,10 +14,10 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
 }) => {
   const variants = {
-    default: 'bg-gray-100 text-gray-700',
-    success: 'bg-emerald-50 text-emerald-700',
-    warning: 'bg-primary/10 text-primary',
-    error: 'bg-red-50 text-red-700',
+    default: 'bg-muted text-text-secondary',
+    success: 'bg-success/10 text-success',
+    warning: 'bg-warning/10 text-warning',
+    error: 'bg-error/10 text-error',
     info: 'bg-secondary/10 text-secondary',
   };
 

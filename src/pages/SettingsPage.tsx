@@ -249,17 +249,17 @@ export const SettingsPage: React.FC = () => {
           </h2>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-gray-500">Event</span>
+              <span className="text-text-secondary">Event</span>
               <span className="font-medium">
                 {eventDetails?.event_name || 'Not selected'}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Device ID</span>
+              <span className="text-text-secondary">Device ID</span>
               <span className="font-mono text-sm">{deviceId}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Downloaded Tickets</span>
+              <span className="text-text-secondary">Downloaded Tickets</span>
               <span className="font-medium">{downloadedTicketCount}</span>
             </div>
           </div>
@@ -285,7 +285,7 @@ export const SettingsPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 mb-3">No types selected</p>
+            <p className="text-sm text-text-secondary mb-3">No types selected</p>
           )}
 
           <Button
@@ -305,11 +305,11 @@ export const SettingsPage: React.FC = () => {
           </h2>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-gray-500">Pending Scans</span>
+              <span className="text-text-secondary">Pending Scans</span>
               <span className="font-medium">{pendingScans.length}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Last Sync</span>
+              <span className="text-text-secondary">Last Sync</span>
               <span className="text-sm">
                 {lastSyncTime
                   ? new Date(lastSyncTime).toLocaleString()
@@ -339,7 +339,7 @@ export const SettingsPage: React.FC = () => {
           </h2>
           <div className="space-y-3">
             <div 
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-muted cursor-pointer"
               onClick={() => setSoundEnabled(!soundEnabled)}
             >
               <div className="flex items-center gap-3">
@@ -353,15 +353,15 @@ export const SettingsPage: React.FC = () => {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Sound Effects</p>
-                  <p className="text-xs text-gray-500">Play sounds on scan results</p>
+                  <p className="font-medium text-text-primary">Sound Effects</p>
+                  <p className="text-xs text-text-secondary">Play sounds on scan results</p>
                 </div>
               </div>
               <Checkbox checked={soundEnabled} onChange={setSoundEnabled} />
             </div>
 
             <div 
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+              className="flex items-center justify-between p-2 rounded-lg hover:bg-muted cursor-pointer"
               onClick={() => setVibrationEnabled(!vibrationEnabled)}
             >
               <div className="flex items-center gap-3">
@@ -371,8 +371,8 @@ export const SettingsPage: React.FC = () => {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Vibration</p>
-                  <p className="text-xs text-gray-500">Haptic feedback on scan</p>
+                  <p className="font-medium text-text-primary">Vibration</p>
+                  <p className="text-xs text-text-secondary">Haptic feedback on scan</p>
                 </div>
               </div>
               <Checkbox checked={vibrationEnabled} onChange={setVibrationEnabled} />
@@ -382,7 +382,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* Data Management */}
         <Card variant="elevated" padding="md">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+          <h2 className="text-sm font-semibold text-text-secondary mb-3">
             Data Management
           </h2>
           <div className="space-y-3">
@@ -410,7 +410,7 @@ export const SettingsPage: React.FC = () => {
         </Card>
 
         {/* Version */}
-        <p className="text-center text-xs text-gray-400 mt-8">
+        <p className="text-center text-xs text-text-tertiary mt-8">
           Scan App v1.0.0 • © 2026 263tickets
         </p>
       </div>
@@ -426,13 +426,13 @@ export const SettingsPage: React.FC = () => {
           <Loading message="Loading ticket types..." />
         ) : ticketGroups.length === 0 ? (
           <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Ticket Types Found</h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <h3 className="text-lg font-medium text-text-primary mb-2">No Ticket Types Found</h3>
+            <p className="text-sm text-text-secondary mb-4">
               This event doesn't have any ticket types available, or there was an error loading them.
             </p>
             <Button variant="outline" size="sm" onClick={loadTicketGroups}>
@@ -454,7 +454,7 @@ export const SettingsPage: React.FC = () => {
                     ${
                       tempSelectedTypes.includes(group.type)
                         ? 'border-secondary bg-secondary/10'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-border hover:border-border'
                     }
                   `}
                   onClick={() => toggleType(group.type)}
@@ -476,7 +476,7 @@ export const SettingsPage: React.FC = () => {
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-sm text-gray-500 mb-3">
+              <p className="text-sm text-text-secondary mb-3">
                 Selected: {tempSelectedTypes.length} types (
                 {ticketGroups
                   .filter((g) => tempSelectedTypes.includes(g.type))
@@ -504,7 +504,7 @@ export const SettingsPage: React.FC = () => {
         title="Clear All Data?"
         size="sm"
       >
-        <p className="text-gray-600 mb-4">
+        <p className="text-text-secondary mb-4">
           This will remove all downloaded tickets and scan history. This action
           cannot be undone.
         </p>
@@ -534,7 +534,7 @@ export const SettingsPage: React.FC = () => {
         title="Logout?"
         size="sm"
       >
-        <p className="text-gray-600 mb-4">
+        <p className="text-text-secondary mb-4">
           {pendingScans.length > 0
             ? `You have ${pendingScans.length} unsynced scans. They will be lost if you logout now.`
             : 'Are you sure you want to logout?'}

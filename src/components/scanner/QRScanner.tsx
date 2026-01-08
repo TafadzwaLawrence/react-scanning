@@ -291,7 +291,7 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
         <div 
           className={`
             w-64 h-64 border-2 rounded-lg transition-all duration-100
-            ${scanFlash ? 'border-green-400 bg-green-400/30 scale-95' : 'border-white/60'}
+            ${scanFlash ? 'border-success bg-success/30 scale-95' : 'border-white/60'}
           `}
         >
           {/* Corners */}
@@ -352,7 +352,7 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
             onClick={toggleFlash}
             aria-label={isFlashOn ? 'Turn off flashlight' : 'Turn on flashlight'}
             className={`p-3 rounded-full transition-colors ${
-              isFlashOn ? 'bg-amber-500 text-white' : 'bg-white/20 text-white backdrop-blur'
+              isFlashOn ? 'bg-warning text-white' : 'bg-white/20 text-white backdrop-blur'
             }`}
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

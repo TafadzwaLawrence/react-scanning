@@ -54,19 +54,19 @@ export const ReportsPage: React.FC = () => {
 
   if (!isOnline) {
     return (
-      <div className="min-h-screen bg-gray-100 pb-20">
-        <div className="bg-white border-b border-gray-200 p-4">
-          <h1 className="text-xl font-bold text-gray-900">Reports</h1>
+      <div className="min-h-screen bg-muted pb-20">
+        <div className="bg-white border-b border-border p-4">
+          <h1 className="text-xl font-bold text-text-primary">Reports</h1>
         </div>
         <div className="p-4 flex flex-col items-center justify-center" style={{ minHeight: 'calc(100vh - 200px)' }}>
           <Card variant="elevated" padding="lg" className="w-full max-w-sm text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">You're Offline</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-text-primary mb-2">You're Offline</h2>
+            <p className="text-sm text-text-secondary">
               Reports require an internet connection. Please connect to view the reconciliation report.
             </p>
           </Card>
@@ -158,7 +158,7 @@ export const ReportsPage: React.FC = () => {
 
             {/* Summary Stats */}
             <Card variant="elevated" padding="md">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">
+              <h2 className="text-sm font-semibold text-text-secondary mb-4">
                 Summary
               </h2>
               <div className="grid grid-cols-2 gap-4">
@@ -205,24 +205,24 @@ export const ReportsPage: React.FC = () => {
 
             {/* Revenue Summary */}
             <Card variant="elevated" padding="md">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">
+              <h2 className="text-sm font-semibold text-text-secondary mb-4">
                 Revenue
               </h2>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Total Revenue</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="text-text-secondary">Total Revenue</span>
+                  <span className="font-semibold text-text-primary">
                     {formatCurrency(report.summary.total_revenue)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Scanned Revenue</span>
+                  <span className="text-text-secondary">Scanned Revenue</span>
                   <span className="font-semibold text-emerald-600">
                     {formatCurrency(report.summary.scanned_revenue)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-gray-600">Unscanned Revenue</span>
+                  <span className="text-text-secondary">Unscanned Revenue</span>
                   <span className="font-semibold text-amber-600">
                     {formatCurrency(report.summary.total_revenue - report.summary.scanned_revenue)}
                   </span>
@@ -232,14 +232,14 @@ export const ReportsPage: React.FC = () => {
 
             {/* Ticket Type Breakdown */}
             <Card variant="elevated" padding="md">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">
+              <h2 className="text-sm font-semibold text-text-secondary mb-4">
                 By Ticket Type
               </h2>
               <div className="space-y-4">
                 {Object.entries(report.ticket_type_analysis).map(([type, data]) => (
                   <div key={type} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-gray-900">{type}</span>
+                      <span className="font-medium text-text-primary">{type}</span>
                       <Badge
                         variant={data.scan_rate > 50 ? 'success' : data.scan_rate > 25 ? 'warning' : 'default'}
                         size="sm"
@@ -249,20 +249,20 @@ export const ReportsPage: React.FC = () => {
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-xs">
                       <div>
-                        <p className="text-gray-500">Total</p>
+                        <p className="text-text-secondary">Total</p>
                         <p className="font-medium">{data.total_count.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Scanned</p>
+                        <p className="text-text-secondary">Scanned</p>
                         <p className="font-medium text-emerald-600">{data.scanned_count.toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Avg Price</p>
+                        <p className="text-text-secondary">Avg Price</p>
                         <p className="font-medium">{formatCurrency(data.average_price)}</p>
                       </div>
                     </div>
                     {/* Mini progress bar */}
-                    <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary rounded-full"
                         style={{ width: `${Math.min(data.scan_rate, 100)}%` }}
@@ -276,7 +276,7 @@ export const ReportsPage: React.FC = () => {
             {/* Device Analysis */}
             {Object.keys(report.device_analysis).length > 0 && (
               <Card variant="elevated" padding="md">
-                <h2 className="text-sm font-semibold text-gray-700 mb-4">
+                <h2 className="text-sm font-semibold text-text-secondary mb-4">
                   By Device
                 </h2>
                 <div className="space-y-2">
@@ -285,9 +285,9 @@ export const ReportsPage: React.FC = () => {
                     .map(([deviceId, count]) => (
                       <div
                         key={deviceId}
-                        className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                        className="flex items-center justify-between p-2 bg-muted rounded-lg"
                       >
-                        <span className="font-mono text-sm text-gray-700">{deviceId}</span>
+                        <span className="font-mono text-sm text-text-secondary">{deviceId}</span>
                         <Badge variant="info" size="sm">
                           {count.toLocaleString()} scans
                         </Badge>
@@ -298,7 +298,7 @@ export const ReportsPage: React.FC = () => {
             )}
 
             {/* Last Updated */}
-            <p className="text-center text-xs text-gray-400">
+            <p className="text-center text-xs text-text-tertiary">
               Last refreshed: {format(new Date(), 'MMM d, h:mm a')}
             </p>
           </>

@@ -42,7 +42,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
             ${
               checked
                 ? 'bg-secondary border-secondary'
-                : 'bg-white border-gray-300 hover:border-gray-400'
+                : 'bg-white border-border hover:border-text-tertiary'
             }
           `}
         >
@@ -64,7 +64,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         </div>
       </div>
       {label && (
-        <span className="text-sm text-gray-700 select-none">{label}</span>
+        <span className="text-sm text-text-secondary select-none">{label}</span>
       )}
     </label>
   );

@@ -1,62 +1,71 @@
 @import 'tailwindcss';
 
-/* Tailwind 4.x Theme Configuration */
+/* Tailwind 4.x Theme Configuration - Clean Color System */
 @theme {
+  /* Brand Colors */
   --color-primary: #ff6600;
-  --color-primary-light: #ff8a33;
-  --color-primary-dark: #cc5200;
+  --color-primary-light: #ff8533;
+  --color-primary-dark: #e65c00;
   --color-secondary: #00007c;
-  --color-secondary-light: #2a2a9a;
-  --color-secondary-dark: #00005a;
+  --color-secondary-light: #1a1a8f;
+  --color-secondary-dark: #000066;
+  
+  /* Neutrals - Simplified gray scale */
   --color-surface: #FFFFFF;
-  --color-border: #E6E6E6;
-  --color-text-primary: #0B0B0B;
-  --color-text-secondary: #6B7280;
-  --color-black: #0B0B0B;
+  --color-muted: #F5F5F5;
+  --color-border: #E5E5E5;
+  --color-text-primary: #111111;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-black: #111111;
+  
+  /* Status Colors - Consistent semantic */
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+  --color-info: var(--color-secondary);
   
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* Custom CSS Variables based on design specs */
+/* CSS Variables for runtime access */
 :root {
-  /* Brand Colors (minimalistic) */
-  --color-primary: #ff6600; /* primary CTA / accent */
-  --color-primary-light: #ff8a33;
-  --color-primary-dark: #cc5200;
-
-  --color-secondary: #00007c; /* secondary accent */
-  --color-secondary-light: #2a2a9a;
-  --color-secondary-dark: #00005a;
-
-  /* Accent maps to primary */
-  --color-accent: var(--color-primary);
-
-  /* Status Colors */
-  --color-success: #10B981;
-  --color-success-light: #D1FAE5;
-  --color-warning: #F59E0B;
-  --color-warning-light: #FEF3C7;
-  --color-error: #EF4444;
-  --color-error-light: #FEE2E2;
-  --color-info: #3B82F6;
-  --color-info-light: #DBEAFE;
-
-  /* Scan Result Colors */
-  --color-valid: #10B981;
-  --color-used: #F97316;
-  --color-invalid: #EF4444;
-
-  /* Neutrals (flat, lots of white + black accents) */
+  /* Brand Colors */
+  --color-primary: #ff6600;
+  --color-primary-light: #ff8533;
+  --color-primary-dark: #e65c00;
+  --color-secondary: #00007c;
+  --color-secondary-light: #1a1a8f;
+  --color-secondary-dark: #000066;
+  
+  /* Neutrals */
   --color-background: #FFFFFF;
   --color-surface: #FFFFFF;
-  --color-border: #E6E6E6;
-  --color-black: #0B0B0B;
-
-  /* Text */
-  --color-text-primary: var(--color-black);
-  --color-text-secondary: #6B7280;
-  --color-text-disabled: #9CA3AF;
+  --color-muted: #F5F5F5;
+  --color-border: #E5E5E5;
+  --color-black: #111111;
+  
+  /* Text Hierarchy */
+  --color-text-primary: #111111;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-text-disabled: #BBBBBB;
+  
+  /* Status Colors */
+  --color-success: #059669;
+  --color-success-light: #D1FAE5;
+  --color-warning: #D97706;
+  --color-warning-light: #FEF3C7;
+  --color-error: #DC2626;
+  --color-error-light: #FEE2E2;
+  --color-info: var(--color-secondary);
+  --color-info-light: #E0E0FF;
+  
+  /* Scan Results - Maps to status */
+  --color-valid: var(--color-success);
+  --color-used: var(--color-warning);
+  --color-invalid: var(--color-error);
 
   /* Typography */
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

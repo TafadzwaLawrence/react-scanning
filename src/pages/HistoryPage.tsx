@@ -44,15 +44,15 @@ export const HistoryPage: React.FC = () => {
         {/* Quick Stats */}
         <div className="flex gap-4 mt-4 text-sm">
           <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="w-2 h-2 rounded-full bg-success" />
             <span className="text-text-secondary">{stats.valid} valid</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-orange-500" />
+            <span className="w-2 h-2 rounded-full bg-warning" />
             <span className="text-text-secondary">{stats.used} used</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="w-2 h-2 rounded-full bg-error" />
             <span className="text-text-secondary">{stats.invalid} invalid</span>
           </div>
         </div>
@@ -63,7 +63,7 @@ export const HistoryPage: React.FC = () => {
         {scanHistory.length === 0 ? (
           <Card variant="filled" padding="lg" className="text-center">
             <svg
-              className="w-12 h-12 text-gray-300 mx-auto mb-3"
+              className="w-12 h-12 text-text-tertiary mx-auto mb-3"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -75,8 +75,8 @@ export const HistoryPage: React.FC = () => {
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <p className="text-gray-500">No scans yet</p>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-text-secondary">No scans yet</p>
+            <p className="text-sm text-text-tertiary mt-1">
               Start scanning to see history here
             </p>
           </Card>
@@ -93,34 +93,34 @@ export const HistoryPage: React.FC = () => {
                           {config.label}
                         </Badge>
                         {scan.ticket?.type && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-text-secondary">
                             {scan.ticket.type}
                           </span>
                         )}
                       </div>
 
                       {scan.ticket?.number && (
-                        <p className="mt-1 font-mono text-sm text-gray-900">
+                        <p className="mt-1 font-mono text-sm text-text-primary">
                           #{scan.ticket.number}
                         </p>
                       )}
 
-                      <p className="mt-1 text-xs text-gray-500 truncate max-w-[200px]">
+                      <p className="mt-1 text-xs text-text-secondary truncate max-w-[200px]">
                         {scan.qrCode}
                       </p>
 
                       {scan.message && (
-                        <p className="mt-1 text-xs text-gray-400">
+                        <p className="mt-1 text-xs text-text-tertiary">
                           {scan.message}
                         </p>
                       )}
                     </div>
 
                     <div className="text-right">
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-text-tertiary">
                         {format(new Date(scan.scannedAt), 'h:mm a')}
                       </p>
-                      <p className="text-xs text-gray-300">
+                      <p className="text-xs text-text-tertiary">
                         {format(new Date(scan.scannedAt), 'MMM d')}
                       </p>
                     </div>

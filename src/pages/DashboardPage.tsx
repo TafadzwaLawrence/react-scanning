@@ -152,7 +152,7 @@ export const DashboardPage: React.FC = () => {
             <h1 className="text-xl font-bold">
               {eventDetails?.event_name || 'Dashboard'}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-text-secondary mt-1">
               Device: <span className="font-mono">{deviceId}</span>
             </p>
           </div>
@@ -174,7 +174,7 @@ export const DashboardPage: React.FC = () => {
 
           <Card variant="elevated" padding="md">
             <div className="text-center">
-              <p className="text-3xl font-bold text-emerald-600">{scannedCount}</p>
+              <p className="text-3xl font-bold text-success">{scannedCount}</p>
               <p className="text-xs text-text-secondary mt-1">Scanned</p>
             </div>
           </Card>
@@ -217,7 +217,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Active Ticket Types */}
         <Card variant="elevated" padding="md">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+          <h2 className="text-sm font-semibold text-text-secondary mb-3">
             Active Ticket Types
           </h2>
           {selectedTicketTypes.length > 0 ? (
@@ -229,7 +229,7 @@ export const DashboardPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">No ticket types selected</p>
+            <p className="text-sm text-text-secondary">No ticket types selected</p>
           )}
           <Button
             variant="outline"
@@ -245,8 +245,8 @@ export const DashboardPage: React.FC = () => {
         <Card variant="filled" padding="md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Last sync</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm text-text-secondary">Last sync</p>
+              <p className="text-sm font-medium text-text-primary">
                 {lastSyncTime
                   ? format(new Date(lastSyncTime), 'MMM d, h:mm a')
                   : 'Never'}
@@ -254,7 +254,7 @@ export const DashboardPage: React.FC = () => {
             </div>
             <svg
               className={`w-5 h-5 ${
-                isOnline ? 'text-emerald-500' : 'text-gray-400'
+                isOnline ? 'text-success' : 'text-text-tertiary'
               }`}
               fill="none"
               viewBox="0 0 24 24"

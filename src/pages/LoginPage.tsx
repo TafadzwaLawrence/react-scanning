@@ -138,7 +138,7 @@ export const LoginPage: React.FC = () => {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+              <div className="p-3 bg-error/10 border border-error/20 rounded-lg text-sm text-error">
                 {error}
               </div>
             )}
@@ -160,11 +160,11 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-muted">Device ID: <span className="font-mono">{deviceId}</span></p>
+            <p className="text-xs text-text-tertiary">Device ID: <span className="font-mono">{deviceId}</span></p>
 
             <div className="mt-2 flex items-center justify-center gap-2 text-sm">
-              <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-red-500'}`} />
-              <span className={isOnline ? 'text-emerald-600' : 'text-red-600'}>
+              <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-success' : 'bg-error'}`} />
+              <span className={isOnline ? 'text-success' : 'text-error'}>
                 {isOnline ? 'Connected' : 'Offline'}
               </span>
             </div>

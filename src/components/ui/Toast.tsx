@@ -8,18 +8,18 @@ const ToastItem: React.FC<{ toast: ToastType; onClose: () => void }> = ({
 }) => {
   const variants = {
     success: {
-      bg: 'bg-emerald-50 border-emerald-200',
-      icon: 'text-emerald-500',
-      title: 'text-emerald-800',
+      bg: 'bg-success/10 border-success/20',
+      icon: 'text-success',
+      title: 'text-success',
     },
     error: {
-      bg: 'bg-red-50 border-red-200',
-      icon: 'text-red-500',
-      title: 'text-red-800',
+      bg: 'bg-error/10 border-error/20',
+      icon: 'text-error',
+      title: 'text-error',
     },
     warning: {
-      bg: 'bg-primary/10 border-primary/20',
-      icon: 'text-primary',
+      bg: 'bg-warning/10 border-warning/20',
+      icon: 'text-warning',
       title: 'text-text-primary',
     },
     info: {

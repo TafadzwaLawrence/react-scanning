@@ -24,8 +24,8 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
 
   const configs = {
     valid: {
-      bg: 'bg-emerald-500',
-      border: 'border-emerald-400',
+      bg: 'bg-success',
+      border: 'border-success/80',
       icon: (
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -34,8 +34,8 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
       title: 'VALID',
     },
     used: {
-      bg: 'bg-orange-500',
-      border: 'border-orange-400',
+      bg: 'bg-warning',
+      border: 'border-warning/80',
       icon: (
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -44,8 +44,8 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
       title: 'ALREADY USED',
     },
     invalid: {
-      bg: 'bg-red-500',
-      border: 'border-red-400',
+      bg: 'bg-error',
+      border: 'border-error/80',
       icon: (
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
@@ -54,8 +54,8 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
       title: 'INVALID',
     },
     'wrong-type': {
-      bg: 'bg-amber-500',
-      border: 'border-amber-400',
+      bg: 'bg-warning',
+      border: 'border-warning/80',
       icon: (
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -74,8 +74,8 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
       title: 'QUEUED',
     },
     error: {
-      bg: 'bg-red-500',
-      border: 'border-red-400',
+      bg: 'bg-error',
+      border: 'border-error/80',
       icon: (
         <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
