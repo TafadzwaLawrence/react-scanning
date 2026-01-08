@@ -1,13 +1,12 @@
-import { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import {
-  LoginPage,
-  DashboardPage,
-  ScannerPage,
-  HistoryPage,
-  ReportsPage,
-  SettingsPage,
-} from '@/pages';
+import { Loading } from '@/components/ui';
+const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
+const DashboardPage = lazy(() => import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
+const ScannerPage = lazy(() => import('@/pages/ScannerPage').then((m) => ({ default: m.ScannerPage })));
+const HistoryPage = lazy(() => import('@/pages/HistoryPage').then((m) => ({ default: m.HistoryPage })));
+const ReportsPage = lazy(() => import('@/pages/ReportsPage').then((m) => ({ default: m.ReportsPage })));
+const SettingsPage = lazy(() => import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 import { ProtectedRoute } from '@/components/auth';
 import { BottomNav, OfflineIndicator } from '@/components/layout';
 import { ToastContainer } from '@/components/ui';
@@ -53,7 +52,8 @@ function AppContent() {
         <ToastContainer />
         <PWAUpdatePrompt />
 
-        <Routes>
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loading size="lg" message="Loading…" /></div>}>
+          <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
 
@@ -102,7 +102,8 @@ function AppContent() {
           {/* Default Redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+          </Routes>
+        </Suspense>
 
         {!isLoginPage && <BottomNav />}
       </div>
