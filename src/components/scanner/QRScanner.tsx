@@ -36,6 +36,12 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
   const [hasFlash, setHasFlash] = useState(false);
   const [isStarting, setIsStarting] = useState(true);
   const [scanFlash, setScanFlash] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [isCooldown, setIsCooldown] = useState(false);
+
+  // Expose start/stop to outside via refs so UI buttons can call them
+  const startScannerRef = useRef<((isRestart?: boolean) => Promise<void>) | null>(null);
+  const stopScannerRef = useRef<(() => Promise<void>) | null>(null);
 
   // Update refs silently (no re-render, no effect trigger)
   onScanRef.current = onScan;
@@ -111,6 +117,7 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
             // Prevent concurrent processing of multiple detections
             if (isHandlingRef.current) return;
             isHandlingRef.current = true;
+            setIsCooldown(true);
 
             try {
               setScanFlash(true);
@@ -131,6 +138,7 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
               await new Promise((r) => setTimeout(r, 700));
             } finally {
               isHandlingRef.current = false;
+              setIsCooldown(false);
             }
           },
           () => {}
@@ -150,14 +158,25 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
         }
 
         setIsStarting(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Scanner error:', err);
         if (mounted) {
-          onErrorRef.current?.('Camera failed. Check permissions.');
+          const msg = err?.message || String(err);
+          // Detect permission denied
+          if (msg.toLowerCase().includes('permission') || err?.name === 'NotAllowedError') {
+            setPermissionDenied(true);
+            onErrorRef.current?.('Camera permissions denied.');
+          } else {
+            onErrorRef.current?.('Camera failed. Check permissions.');
+          }
           setIsStarting(false);
         }
       }
     };
+
+    // Expose start/stop for external controls
+    startScannerRef.current = startScanner;
+    stopScannerRef.current = stopScanner;
 
     // Handle visibility change - restart camera when tab becomes visible again
     const handleVisibilityChange = async () => {
@@ -243,6 +262,22 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
     }
   };
 
+  const handleRetry = async () => {
+    setPermissionDenied(false);
+    setIsStarting(true);
+    try {
+      if (startScannerRef.current) await startScannerRef.current(true);
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const handleStop = async () => {
+    try {
+      if (stopScannerRef.current) await stopScannerRef.current();
+    } catch {}
+  };
+
   return (
     <div className="relative w-full h-full" ref={containerRef}>
       <div
@@ -282,6 +317,27 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
         </div>
       )}
 
+      {/* Validating overlay during cooldown */}
+      {isCooldown && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="bg-black/50 text-white px-4 py-2 rounded-md">Validating scan…</div>
+        </div>
+      )}
+
+      {/* Permission denied modal */}
+      {permissionDenied && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-50">
+          <div className="bg-white rounded-lg p-6 w-[90%] max-w-sm text-center">
+            <h3 className="text-lg font-semibold text-text-primary mb-2">Camera access needed</h3>
+            <p className="text-sm text-text-secondary mb-4">This app needs permission to use the camera to scan tickets. Please enable camera access in your browser or device settings.</p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={handleRetry} className="px-4 py-2 bg-black text-white rounded-md">Retry</button>
+              <button onClick={() => setPermissionDenied(false)} className="px-4 py-2 border rounded-md">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Instructions */}
       <div className="absolute top-4 left-0 right-0 text-center">
         <span className="text-white/90 text-sm bg-black/50 px-4 py-1.5 rounded-full">
@@ -302,6 +358,19 @@ export const QRScanner: React.FC<QRScannerProps> = memo(({ onScan, onError }) =>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Stop button */}
+      {!isStarting && (
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={handleStop}
+            aria-label="Stop camera"
+            className="px-3 py-2 bg-white/20 text-white rounded-md"
+          >
+            Stop
           </button>
         </div>
       )}

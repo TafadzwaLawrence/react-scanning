@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Badge, Loading } from '@/components/ui';
+import { Card, Button, Badge, Loading, Skeleton } from '@/components/ui';
 import { useAuthStore, useEventStore, useSyncStore } from '@/stores';
 import { db } from '@/services/db';
 import { format } from 'date-fns';
@@ -57,8 +57,36 @@ export const DashboardPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loading size="lg" message="Loading dashboard..." />
+      <div className="min-h-screen bg-background pb-20">
+        <div className="bg-surface border-b border-border text-text-primary p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold">
+                <Skeleton width="w-48" height="h-6" />
+              </h1>
+              <p className="text-sm text-text-secondary mt-1">
+                <Skeleton width="w-32" />
+              </p>
+            </div>
+            <div>
+              <Skeleton width="w-16" height="h-6" />
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Card variant="elevated" padding="md"><Skeleton height="h-12"/></Card>
+            <Card variant="elevated" padding="md"><Skeleton height="h-12"/></Card>
+            <Card variant="elevated" padding="md"><Skeleton height="h-12"/></Card>
+            <Card variant="elevated" padding="md"><Skeleton height="h-12"/></Card>
+          </div>
+
+          <Card variant="elevated" padding="md">
+            <h2 className="text-sm font-semibold text-text-secondary mb-4"><Skeleton width="w-32"/></h2>
+            <div className="h-48"><Skeleton height="h-48"/></div>
+          </Card>
+        </div>
       </div>
     );
   }
