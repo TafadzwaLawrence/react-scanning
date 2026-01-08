@@ -56,7 +56,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in"
       role="presentation"
     >
       <div
@@ -64,23 +64,23 @@ export const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
         className={`
-          ${sizes[size]} w-full bg-white rounded-2xl shadow-xl
+          ${sizes[size]} w-full bg-surface rounded-2xl border border-border
           animate-slide-up m-4
         `}
       >
         {(title || showClose) && (
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-4 border-b border-border">
             {title && (
-              <h2 id="modal-title" className="text-lg font-semibold text-gray-900">{title}</h2>
+              <h2 id="modal-title" className="text-lg font-semibold text-text-primary">{title}</h2>
             )}
             {showClose && (
               <button
                 onClick={onClose}
                 aria-label="Close modal"
-                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-1 rounded-lg hover:bg-black/5 transition-colors text-text-secondary"
               >
                 <svg
-                  className="w-5 h-5 text-gray-500"
+                  className="w-5 h-5 text-text-secondary"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

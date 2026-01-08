@@ -13,7 +13,7 @@ export const OfflineIndicator: React.FC = () => {
     <div
       className={`
         fixed top-0 left-0 right-0 z-50 py-2 px-4 text-center text-sm font-medium
-        ${isOnline ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}
+        ${isOnline ? 'bg-primary/10 text-primary' : 'bg-red-50 text-red-800'}
       `}
     >
       <div className="flex items-center justify-center gap-2">

@@ -235,16 +235,16 @@ export const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
-        <h1 className="text-xl font-bold text-gray-900">Settings</h1>
+      <div className="bg-surface border-b border-border p-4">
+        <h1 className="text-xl font-bold text-text-primary">Settings</h1>
       </div>
 
       <div className="p-4 space-y-4">
         {/* Event Info */}
         <Card variant="elevated" padding="md">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+          <h2 className="text-sm font-semibold text-text-secondary mb-3">
             Current Event
           </h2>
           <div className="space-y-2">
@@ -268,7 +268,7 @@ export const SettingsPage: React.FC = () => {
         {/* Ticket Types */}
         <Card variant="elevated" padding="md">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-700">
+            <h2 className="text-sm font-semibold text-text-secondary">
               Ticket Types
             </h2>
             <Badge variant="info" size="sm">
@@ -300,7 +300,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* Sync Status */}
         <Card variant="elevated" padding="md">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+            <h2 className="text-sm font-semibold text-text-secondary mb-3">
             Sync Status
           </h2>
           <div className="space-y-2">
@@ -334,7 +334,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* Sound & Feedback Settings */}
         <Card variant="elevated" padding="md">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
+          <h2 className="text-sm font-semibold text-text-secondary mb-3">
             Sound & Feedback
           </h2>
           <div className="space-y-3">
@@ -343,8 +343,8 @@ export const SettingsPage: React.FC = () => {
               onClick={() => setSoundEnabled(!soundEnabled)}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${soundEnabled ? 'bg-indigo-100' : 'bg-gray-100'}`}>
-                  <svg className={`w-5 h-5 ${soundEnabled ? 'text-indigo-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${soundEnabled ? 'bg-primary/10' : 'bg-surface'}`}>
+                  <svg className={`w-5 h-5 ${soundEnabled ? 'text-primary' : 'text-text-secondary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     {soundEnabled ? (
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                     ) : (
@@ -365,8 +365,8 @@ export const SettingsPage: React.FC = () => {
               onClick={() => setVibrationEnabled(!vibrationEnabled)}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${vibrationEnabled ? 'bg-indigo-100' : 'bg-gray-100'}`}>
-                  <svg className={`w-5 h-5 ${vibrationEnabled ? 'text-indigo-600' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${vibrationEnabled ? 'bg-primary/10' : 'bg-surface'}`}>
+                  <svg className={`w-5 h-5 ${vibrationEnabled ? 'text-primary' : 'text-text-secondary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
                 </div>

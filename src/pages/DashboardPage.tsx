@@ -57,7 +57,7 @@ export const DashboardPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <Loading size="lg" message="Loading dashboard..." />
       </div>
     );
@@ -66,15 +66,15 @@ export const DashboardPage: React.FC = () => {
   // Show setup prompt if no tickets downloaded
   if (totalTickets === 0) {
     return (
-      <div className="min-h-screen bg-gray-100 pb-20">
+      <div className="min-h-screen bg-background pb-20">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 text-gray-900 p-4">
+        <div className="bg-surface border-b border-border text-text-primary p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold">
+              <h1 className="text-xl font-bold text-text-primary">
                 {eventDetails?.event_name || 'Dashboard'}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-text-secondary mt-1">
                 Device: <span className="font-mono">{deviceId}</span>
               </p>
             </div>
@@ -86,13 +86,13 @@ export const DashboardPage: React.FC = () => {
 
         <div className="p-4 flex flex-col items-center justify-center" style={{ minHeight: 'calc(100vh - 200px)' }}>
           <Card variant="elevated" padding="lg" className="w-full max-w-sm text-center">
-            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Setup Required</h2>
-            <p className="text-sm text-gray-600 mb-6">
+            <h2 className="text-lg font-semibold text-text-primary mb-2">Setup Required</h2>
+            <p className="text-sm text-text-secondary mb-6">
               You need to download tickets before you can start scanning. Go to Settings to select ticket types and download.
             </p>
             <Button
@@ -115,9 +115,9 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 text-gray-900 p-4">
+      <div className="bg-surface border-b border-border text-text-primary p-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold">
@@ -138,36 +138,36 @@ export const DashboardPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <Card variant="elevated" padding="md">
             <div className="text-center">
-              <p className="text-3xl font-bold text-indigo-600">{totalTickets}</p>
-              <p className="text-xs text-gray-500 mt-1">Total Tickets</p>
+              <p className="text-3xl font-bold text-text-primary">{totalTickets}</p>
+              <p className="text-xs text-text-secondary mt-1">Total Tickets</p>
             </div>
           </Card>
 
           <Card variant="elevated" padding="md">
             <div className="text-center">
               <p className="text-3xl font-bold text-emerald-600">{scannedCount}</p>
-              <p className="text-xs text-gray-500 mt-1">Scanned</p>
+              <p className="text-xs text-text-secondary mt-1">Scanned</p>
             </div>
           </Card>
 
           <Card variant="elevated" padding="md">
             <div className="text-center">
-              <p className="text-3xl font-bold text-amber-600">{unsyncedCount}</p>
-              <p className="text-xs text-gray-500 mt-1">Pending Sync</p>
+              <p className="text-3xl font-bold text-primary">{unsyncedCount}</p>
+              <p className="text-xs text-text-secondary mt-1">Pending Sync</p>
             </div>
           </Card>
 
           <Card variant="elevated" padding="md">
             <div className="text-center">
-              <p className="text-3xl font-bold text-violet-600">{syncPercentage}%</p>
-              <p className="text-xs text-gray-500 mt-1">Sync Progress</p>
+              <p className="text-3xl font-bold text-secondary">{syncPercentage}%</p>
+              <p className="text-xs text-text-secondary mt-1">Sync Progress</p>
             </div>
           </Card>
         </div>
 
         {/* Hourly Chart */}
         <Card variant="elevated" padding="md">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4">
+                <h2 className="text-sm font-semibold text-text-secondary mb-4">
             Scans by Hour
           </h2>
           <div className="h-48">
@@ -180,7 +180,7 @@ export const DashboardPage: React.FC = () => {
                 />
                 <YAxis tick={{ fontSize: 10 }} width={30} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#6366F1" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="#00007c" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

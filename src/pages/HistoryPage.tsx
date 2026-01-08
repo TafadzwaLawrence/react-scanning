@@ -24,17 +24,17 @@ export const HistoryPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
+      <div className="bg-surface border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Scan History</h1>
+          <h1 className="text-xl font-bold text-text-primary">Scan History</h1>
           {scanHistory.length > 0 && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearHistory}
-              className="text-red-500 hover:text-red-600"
+              className="text-primary hover:text-primary-dark"
             >
               Clear All
             </Button>
@@ -45,15 +45,15 @@ export const HistoryPage: React.FC = () => {
         <div className="flex gap-4 mt-4 text-sm">
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-gray-600">{stats.valid} valid</span>
+            <span className="text-text-secondary">{stats.valid} valid</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-orange-500" />
-            <span className="text-gray-600">{stats.used} used</span>
+            <span className="text-text-secondary">{stats.used} used</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-red-500" />
-            <span className="text-gray-600">{stats.invalid} invalid</span>
+            <span className="text-text-secondary">{stats.invalid} invalid</span>
           </div>
         </div>
       </div>

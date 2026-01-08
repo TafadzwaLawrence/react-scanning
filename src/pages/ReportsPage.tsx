@@ -17,15 +17,7 @@ export const ReportsPage: React.FC = () => {
   const eventId = eventDetails?.event_id;
 
   const loadReport = async () => {
-    if (!eventId) {
-      setError('No event selected');
-      return;
-    }
-
-    if (!isOnline) {
-      setError('You are offline. Connect to the internet to view reports.');
-      return;
-    }
+    if (!isOnline || !eventId) return;
 
     setIsLoading(true);
     setError(null);
@@ -34,9 +26,9 @@ export const ReportsPage: React.FC = () => {
       const data = await reportsAPI.getReconciliation(eventId);
       setReport(data);
     } catch (err) {
-      console.error('Error loading report:', err);
-      setError('Failed to load report. Please try again.');
-      toast.error('Error', 'Failed to load reconciliation report');
+      console.error('Failed to load reconciliation report', err);
+      setError('Failed to load report.');
+      toast.error('Report Error', 'Unable to fetch reconciliation report.');
     } finally {
       setIsLoading(false);
     }
@@ -84,11 +76,11 @@ export const ReportsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
+      <div className="bg-surface border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">Reports</h1>
+          <h1 className="text-xl font-bold text-text-primary">Reports</h1>
           <Button
             variant="ghost"
             size="sm"
@@ -110,13 +102,13 @@ export const ReportsPage: React.FC = () => {
           </div>
         ) : error && !report ? (
           <Card variant="elevated" padding="lg" className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Report</h2>
-            <p className="text-sm text-gray-600 mb-4">{error}</p>
+            <h2 className="text-lg font-semibold text-text-primary mb-2">Error Loading Report</h2>
+            <p className="text-sm text-text-secondary mb-4">{error}</p>
             <Button variant="primary" size="sm" onClick={loadReport}>
               Try Again
             </Button>
@@ -126,12 +118,12 @@ export const ReportsPage: React.FC = () => {
             {/* Report Header */}
             <Card variant="elevated" padding="md">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-sm font-semibold text-gray-700">
+                <h2 className="text-sm font-semibold text-text-secondary">
                   Reconciliation Report
                 </h2>
                 <Badge variant="success" size="sm">Live</Badge>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-secondary">
                 Generated: {report.report_generated_at} ({report.timezone})
               </p>
             </Card>
@@ -142,41 +134,41 @@ export const ReportsPage: React.FC = () => {
                 Summary
               </h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-indigo-600">
+                <div className="text-center p-3 bg-surface rounded-lg">
+                  <p className="text-2xl font-bold text-text-primary">
                     {report.summary.total_tickets.toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">Total Tickets</p>
+                  <p className="text-xs text-text-secondary">Total Tickets</p>
                 </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-center p-3 bg-surface rounded-lg">
                   <p className="text-2xl font-bold text-emerald-600">
                     {report.summary.scanned_tickets.toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">Scanned</p>
+                  <p className="text-xs text-text-secondary">Scanned</p>
                 </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-violet-600">
+                <div className="text-center p-3 bg-surface rounded-lg">
+                  <p className="text-2xl font-bold text-secondary">
                     {formatPercentage(report.summary.scan_rate)}
                   </p>
-                  <p className="text-xs text-gray-500">Scan Rate</p>
+                  <p className="text-xs text-text-secondary">Scan Rate</p>
                 </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <p className="text-2xl font-bold text-amber-600">
+                <div className="text-center p-3 bg-surface rounded-lg">
+                  <p className="text-2xl font-bold text-primary">
                     {(report.summary.total_tickets - report.summary.scanned_tickets).toLocaleString()}
                   </p>
-                  <p className="text-xs text-gray-500">Remaining</p>
+                  <p className="text-xs text-text-secondary">Remaining</p>
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="mt-4">
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <div className="mt-4">
+                <div className="flex justify-between text-xs text-text-secondary mb-1">
                   <span>Scan Progress</span>
                   <span>{formatPercentage(report.summary.scan_rate)}</span>
                 </div>
-                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-3 bg-border rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
+                    className="h-full bg-secondary rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(report.summary.scan_rate, 100)}%` }}
                   />
                 </div>

@@ -264,15 +264,15 @@ export const ScannerPage: React.FC = () => {
   // Show setup required screen if no event ID
   if (!eventId || !deviceId) {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 pb-20">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 pb-20">
         <Card className="w-full max-w-md text-center" padding="lg">
-          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Setup Required</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-xl font-bold text-text-primary mb-2">Setup Required</h2>
+          <p className="text-text-secondary mb-6">
             Please log in to an event before you can start scanning tickets.
           </p>
           <Button
@@ -293,14 +293,14 @@ export const ScannerPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col pb-20">
+    <div className="min-h-screen bg-background flex flex-col pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-3 flex items-center justify-between">
+      <div className="bg-surface border-b border-border p-3 flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
+          <p className="text-sm font-medium text-text-primary truncate max-w-[200px]">
             {eventDetails?.event_name || 'Scanner'}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-text-secondary">
             Types: {selectedTicketTypes.length > 0 ? selectedTicketTypes.join(', ') : 'All'}
           </p>
         </div>
@@ -310,7 +310,7 @@ export const ScannerPage: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="p-3 bg-white border-b border-gray-200">
+      <div className="p-3 bg-surface border-b border-border">
         <ScanStats stats={stats} syncPercentage={syncPercentage} />
       </div>
 
@@ -326,7 +326,7 @@ export const ScannerPage: React.FC = () => {
           <button
             onClick={() => setShowManualEntry(true)}
             aria-label="Enter ticket code manually"
-            className="bg-white/90 backdrop-blur text-gray-700 px-4 py-2 rounded-full text-sm font-medium shadow-lg flex items-center gap-2"
+            className="bg-surface/95 text-text-primary px-4 py-2 rounded-full text-sm font-medium shadow-lg flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

@@ -93,7 +93,7 @@ export const PWAUpdatePrompt: React.FC = () => {
   if (showInstallBanner && installPrompt && !isInstalled && !wasDismissed && !needRefresh) {
     return (
       <div className="fixed bottom-20 left-4 right-4 z-50 animate-slide-up">
-        <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl shadow-lg p-4 text-white">
+        <div className="rounded-xl shadow-lg p-4 text-white bg-primary">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
               <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -142,10 +142,10 @@ export const PWAUpdatePrompt: React.FC = () => {
   if (needRefresh) {
     return (
       <div className="fixed bottom-20 left-4 right-4 z-50 animate-slide-up">
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+        <div className="bg-surface rounded-xl shadow-lg border border-border p-4">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-              <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </div>

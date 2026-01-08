@@ -89,7 +89,6 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
 
   return (
     <>
-      {/* Modal overlay at bottom - camera stays visible behind */}
       <div
         onClick={onDismiss}
         className={`
@@ -100,14 +99,10 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
           transform transition-all duration-200
           animate-slide-up
         `}
-        style={{
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-        }}
       >
         <div className="p-4 flex items-center gap-4">
           {/* Icon */}
-          <div className="p-2.5 rounded-full bg-white/20 flex-shrink-0">
+          <div className="p-2.5 rounded-full bg-white/10 flex-shrink-0">
             {config.icon}
           </div>
           
@@ -136,12 +131,11 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
           </div>
         </div>
         
-        {/* Progress bar for auto-dismiss */}
-        <div className="h-1 bg-white/20 rounded-b-2xl overflow-hidden">
-          <div 
-            className="h-full bg-white/50 animate-shrink-width"
-            style={{ 
-              animationDuration: `${result.type === 'valid' ? autoDismissMs : autoDismissMs + 500}ms`
+        <div className="h-1 bg-white/10 rounded-b-2xl overflow-hidden">
+          <div
+            className="h-full bg-white/30 animate-shrink-width"
+            style={{
+              animationDuration: `${result.type === 'valid' ? autoDismissMs : autoDismissMs + 500}ms`,
             }}
           />
         </div>
