@@ -1,10 +1,10 @@
 import React from 'react';
-import { Card, Badge, Button } from '@/components/ui';
+import { Card, Badge } from '@/components/ui';
 import { useScannerStore } from '@/stores';
 import { format } from 'date-fns';
 
 export const HistoryPage: React.FC = () => {
-  const { scanHistory, clearHistory, stats } = useScannerStore();
+  const { scanHistory, stats } = useScannerStore();
 
   const getStatusConfig = (type: string) => {
     switch (type) {
@@ -29,16 +29,6 @@ export const HistoryPage: React.FC = () => {
       <div className="bg-surface border-b border-border p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Scan History</h1>
-          {scanHistory.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearHistory}
-              className="text-primary hover:text-primary-dark"
-            >
-              Clear All
-            </Button>
-          )}
         </div>
 
         {/* Quick Stats */}

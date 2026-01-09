@@ -81,9 +81,7 @@ export const BottomNav: React.FC = () => {
               }`}
             >
               <div className="text-current">{item.icon}</div>
-              {!isActive && (
-                <span className="text-xs mt-1 font-medium">{item.label}</span>
-              )}
+              <span className="text-xs mt-1 font-medium text-current">{item.label}</span>
             </NavLink>
           );
         })}
