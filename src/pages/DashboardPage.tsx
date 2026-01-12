@@ -285,6 +285,31 @@ export const DashboardPage: React.FC = () => {
         >
           Start Scanning
         </Button>
+
+        {/* Terms and Conditions */}
+        <div className="text-center text-xs text-text-tertiary space-y-2 pt-2">
+          <p>
+            By using this app, you agree to our{' '}
+            <a 
+              href="https://263tickets.com/terms" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary underline hover:text-primary-dark"
+            >
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a 
+              href="https://263tickets.com/privacy" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary underline hover:text-primary-dark"
+            >
+              Privacy Policy
+            </a>
+          </p>
+          <p>© 2026 263tickets. All rights reserved.</p>
+        </div>
       </div>
     </div>
   );
