@@ -11,6 +11,9 @@ import {
   getQueueStats,
   getAllScans,
   getAllSessionLogs,
+  getPendingSessionLogs,
+  markSessionLogsSynced,
+  addSessionLog,
   cleanupSyncedScans,
   type QueueStats,
 } from './queue';
@@ -276,6 +279,104 @@ export async function syncAll(
     onProgress?.(syncState.progress);
 
     return { success: false, synced: 0, failed: 0, results: [] };
+  }
+}
+
+/**
+ * Sync session logs (login/logout events) to server
+ */
+export async function syncSessionLogs(eventId: string): Promise<{
+  success: boolean;
+  synced: number;
+}> {
+  if (!isSyncClientInitialized() || !navigator.onLine) {
+    return { success: false, synced: 0 };
+  }
+
+  const client = getSyncClient();
+  const pendingLogs = await getPendingSessionLogs(eventId);
+
+  if (pendingLogs.length === 0) {
+    return { success: true, synced: 0 };
+  }
+
+  try {
+    const response = await client.syncSessionLogs(
+      getDeviceId(),
+      pendingLogs.map(log => ({
+        id: log.id,
+        event_id: log.event_id,
+        action: log.action,
+        timestamp: log.timestamp,
+        user_id: log.user_id,
+        user_name: log.user_name,
+        gate_name: log.gate_name,
+        metadata: log.metadata,
+      }))
+    );
+
+    if (response.success) {
+      await markSessionLogsSynced(pendingLogs.map(l => l.id));
+      return { success: true, synced: response.data?.synced_count || pendingLogs.length };
+    }
+
+    return { success: false, synced: 0 };
+  } catch (error) {
+    console.error('Failed to sync session logs:', error);
+    return { success: false, synced: 0 };
+  }
+}
+
+/**
+ * Log a login event
+ */
+export async function logLogin(params: {
+  eventId: string;
+  userId?: number;
+  userName?: string;
+  gateName?: string;
+}): Promise<void> {
+  await addSessionLog({
+    eventId: params.eventId,
+    action: 'login',
+    userId: params.userId,
+    userName: params.userName,
+    gateName: params.gateName,
+    metadata: {
+      device: collectDeviceInfo(),
+      timestamp: new Date().toISOString(),
+    },
+  });
+
+  // Try to sync immediately if online
+  if (navigator.onLine && isSyncClientInitialized()) {
+    syncSessionLogs(params.eventId).catch(console.error);
+  }
+}
+
+/**
+ * Log a logout event
+ */
+export async function logLogout(params: {
+  eventId: string;
+  userId?: number;
+  userName?: string;
+  gateName?: string;
+}): Promise<void> {
+  await addSessionLog({
+    eventId: params.eventId,
+    action: 'logout',
+    userId: params.userId,
+    userName: params.userName,
+    gateName: params.gateName,
+    metadata: {
+      timestamp: new Date().toISOString(),
+    },
+  });
+
+  // Try to sync immediately if online
+  if (navigator.onLine && isSyncClientInitialized()) {
+    syncSessionLogs(params.eventId).catch(console.error);
   }
 }
 

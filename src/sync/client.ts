@@ -258,6 +258,37 @@ export class SyncClient {
   }
 
   /**
+   * Sync session logs (login/logout events)
+   * POST /sync/session-logs
+   */
+  async syncSessionLogs(
+    deviceId: string,
+    logs: Array<{
+      id: string;
+      event_id: string;
+      action: string;
+      timestamp: number;
+      user_id?: number;
+      user_name?: string;
+      gate_name?: string;
+      metadata?: Record<string, unknown>;
+    }>
+  ): Promise<ApiResponse<{ synced_count: number }>> {
+    return makeRequest(
+      `${this.baseUrl}/sync/session-logs`,
+      {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          device_id: deviceId,
+          logs,
+        }),
+      },
+      this.config.timeout
+    );
+  }
+
+  /**
    * Register device with the server (optional endpoint)
    */
   async registerDevice(
@@ -266,7 +297,7 @@ export class SyncClient {
     gateName?: string
   ): Promise<ApiResponse<{ registered: boolean; device_id: string }>> {
     return makeRequest(
-      `${this.baseUrl}/offline/device/register`,
+      `${this.baseUrl}/sync/device/register`,
       {
         method: 'POST',
         headers: this.getHeaders(),

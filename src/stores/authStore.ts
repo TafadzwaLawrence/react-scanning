@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { EventDetails } from '@/types';
+import { logLogin, logLogout } from '@/sync';
 
 // Generate a 5-digit device ID
 const generateDeviceId = (): string => {
@@ -17,7 +18,7 @@ interface AuthState {
   rememberMe: boolean;
 
   // Actions
-  login: (session: string, event: EventDetails) => void;
+  login: (session: string, event: EventDetails, userName?: string) => void;
   logout: () => void;
   setDeviceId: (id: string) => void;
   setGateName: (name: string) => void;
@@ -27,7 +28,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Initial state
       session: null,
       deviceId: generateDeviceId(),
@@ -37,19 +38,40 @@ export const useAuthStore = create<AuthState>()(
       rememberMe: true,
 
       // Actions
-      login: (session, eventDetails) =>
+      login: (session, eventDetails, userName) => {
         set({
           session,
           eventDetails,
           isAuthenticated: true,
-        }),
+        });
 
-      logout: () =>
+        // Log login event for sync
+        if (eventDetails?.event_id) {
+          logLogin({
+            eventId: eventDetails.event_id,
+            userName: userName,
+            gateName: get().gateName,
+          }).catch(console.error);
+        }
+      },
+
+      logout: () => {
+        const { eventDetails, gateName } = get();
+        
+        // Log logout event before clearing state
+        if (eventDetails?.event_id) {
+          logLogout({
+            eventId: eventDetails.event_id,
+            gateName: gateName,
+          }).catch(console.error);
+        }
+
         set({
           session: null,
           eventDetails: null,
           isAuthenticated: false,
-        }),
+        });
+      },
 
       setDeviceId: (deviceId) => set({ deviceId }),
 
