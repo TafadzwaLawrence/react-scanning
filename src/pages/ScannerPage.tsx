@@ -13,7 +13,7 @@ import { AxiosError } from 'axios';
 export const ScannerPage: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
-  const { deviceId, eventDetails } = useAuthStore();
+  const { deviceId, gateName, eventDetails } = useAuthStore();
   const { selectedTicketTypes } = useEventStore();
   const { stats, addScanResult, lastScanResult, clearLastResult } = useScannerStore();
   const { isOnline, addPendingScan, totalScans, syncedScans } = useSyncStore();
@@ -41,12 +41,16 @@ export const ScannerPage: React.FC = () => {
   // Initialize audio on first user interaction
   useEffect(() => {
     const initAudioOnInteraction = () => {
-      SoundPlayer.init();
+      console.log('[ScannerPage] User interaction detected, initializing audio...');
+      SoundPlayer.unlock();
       document.removeEventListener('touchstart', initAudioOnInteraction);
       document.removeEventListener('click', initAudioOnInteraction);
     };
     
-    document.addEventListener('touchstart', initAudioOnInteraction, { once: true });
+    // Initialize immediately (will work if user already interacted)
+    SoundPlayer.init();
+    
+    document.addEventListener('touchstart', initAudioOnInteraction, { once: true, passive: true });
     document.addEventListener('click', initAudioOnInteraction, { once: true });
     
     return () => {
@@ -67,12 +71,20 @@ export const ScannerPage: React.FC = () => {
     }
   }, [vibrationEnabled]);
 
-  // Play sound helper - respects settings
+  // Play sound helper - respects settings (Howler.js is synchronous)
   const playSound = useCallback((type: 'success' | 'failure' | 'warning') => {
-    if (!soundEnabled) return;
-    if (type === 'success') SoundPlayer.success();
-    else if (type === 'failure') SoundPlayer.failure();
-    else if (type === 'warning') SoundPlayer.warning();
+    console.log(`[ScannerPage] playSound called: type=${type}, soundEnabled=${soundEnabled}`);
+    if (!soundEnabled) {
+      console.log('[ScannerPage] Sound disabled, skipping');
+      return;
+    }
+    try {
+      if (type === 'success') SoundPlayer.success();
+      else if (type === 'failure') SoundPlayer.failure();
+      else if (type === 'warning') SoundPlayer.warning();
+    } catch (error) {
+      console.error('[ScannerPage] Sound playback error:', error);
+    }
   }, [soundEnabled]);
 
   const handleScan = useCallback(
@@ -300,13 +312,21 @@ export const ScannerPage: React.FC = () => {
     <div className="min-h-screen bg-background flex flex-col pb-20">
       {/* Header */}
       <div className="bg-surface border-b border-border p-3 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-text-primary truncate max-w-[200px]">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-text-primary truncate">
             {eventDetails?.event_name || 'Scanner'}
           </p>
-          <p className="text-xs text-text-secondary">
-            Types: {selectedTicketTypes.length > 0 ? selectedTicketTypes.join(', ') : 'All'}
-          </p>
+          <div className="flex items-center gap-2 text-xs text-text-secondary">
+            <span className="truncate">
+              Types: {selectedTicketTypes.length > 0 ? selectedTicketTypes.join(', ') : 'All'}
+            </span>
+            {gateName && (
+              <>
+                <span className="text-text-tertiary">•</span>
+                <span className="truncate font-medium text-primary">{gateName}</span>
+              </>
+            )}
+          </div>
         </div>
         <Badge variant={isOnline ? 'success' : 'error'} size="sm">
           {isOnline ? 'Online' : 'Offline'}

@@ -10,7 +10,7 @@ export const LoginPage: React.FC = () => {
   const location = useLocation();
   const toast = useToast();
 
-  const { deviceId, rememberMe, setRememberMe, login } = useAuthStore();
+  const { deviceId, gateName, setGateName, rememberMe, setRememberMe, login } = useAuthStore();
   const isOnline = useSyncStore((state) => state.isOnline);
 
   const [eventCode, setEventCode] = useState('');
@@ -159,10 +159,26 @@ export const LoginPage: React.FC = () => {
             <p id="login-help">Don't have event credentials? Contact your event organiser or visit the event dashboard.</p>
           </div>
 
-          <div className="mt-6 text-center">
-            <p className="text-xs text-text-tertiary">Device ID: <span className="font-mono">{deviceId}</span></p>
+          <div className="mt-6 text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs text-text-tertiary">Device ID:</span>
+              <span className="text-xs font-mono text-text-secondary">{deviceId}</span>
+            </div>
+            
+            <div className="flex items-center justify-center gap-2">
+              <label htmlFor="gate-name" className="text-xs text-text-tertiary">Gate:</label>
+              <input
+                id="gate-name"
+                type="text"
+                value={gateName}
+                onChange={(e) => setGateName(e.target.value)}
+                placeholder="e.g. Main Entrance"
+                className="text-xs px-2 py-1 border border-border rounded bg-surface text-text-primary placeholder:text-text-tertiary w-32 text-center"
+                aria-label="Gate name (optional)"
+              />
+            </div>
 
-            <div className="mt-2 flex items-center justify-center gap-2 text-sm">
+            <div className="flex items-center justify-center gap-2 text-sm">
               <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-success' : 'bg-error'}`} />
               <span className={isOnline ? 'text-success' : 'text-error'}>
                 {isOnline ? 'Connected' : 'Offline'}

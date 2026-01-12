@@ -1,81 +1,143 @@
 /**
- * Sound utilities using MP3 audio files
- * Uses preloaded Audio elements for reliable playback
+ * Sound utilities using Howler.js
+ * Howler.js handles Web Audio API, HTML5 Audio fallback, and mobile quirks
  */
+import { Howl, Howler } from 'howler';
 
-// Preload audio elements for instant playback
-let successAudio: HTMLAudioElement | null = null;
-let failureAudio: HTMLAudioElement | null = null;
-let audioInitialized = false;
+// Sound instances
+let successSound: Howl | null = null;
+let failureSound: Howl | null = null;
+let initialized = false;
+
+// Get the base URL for audio files
+const getAudioPath = (filename: string): string => {
+  const base = import.meta.env.BASE_URL || '/';
+  return `${base}sounds/${filename}`;
+};
 
 /**
- * Initialize audio elements (call after user interaction)
+ * Initialize sounds (call after user interaction for mobile)
  */
-export const initAudio = async (): Promise<void> => {
-  if (audioInitialized) return;
-
+export const initAudio = (): void => {
+  if (initialized) return;
+  
   try {
-    successAudio = new Audio('/sounds/success.mp3');
-    failureAudio = new Audio('/sounds/failure.mp3');
+    console.log('[Sound] Initializing Howler.js sounds...');
     
-    // Preload the audio files
-    successAudio.load();
-    failureAudio.load();
-    
-    audioInitialized = true;
-  } catch (error) {
-    console.error('Failed to initialize audio:', error);
-  }
-};
+    // Create success sound
+    successSound = new Howl({
+      src: [getAudioPath('success.mp3')],
+      volume: 1.0,
+      preload: true,
+      onload: () => console.log('[Sound] Success sound loaded'),
+      onloaderror: (_id, err) => console.error('[Sound] Success sound load error:', err),
+      onplayerror: (_id, err) => {
+        console.error('[Sound] Success sound play error:', err);
+        // Try to unlock and replay
+        Howler.ctx?.resume().then(() => {
+          successSound?.play();
+        });
+      },
+    });
 
-/**
- * Play a success sound - for valid ticket scans
- */
-export const playSuccessSound = async (): Promise<void> => {
-  if (!audioInitialized) {
-    await initAudio();
-  }
+    // Create failure sound
+    failureSound = new Howl({
+      src: [getAudioPath('failure.mp3')],
+      volume: 1.0,
+      preload: true,
+      onload: () => console.log('[Sound] Failure sound loaded'),
+      onloaderror: (_id, err) => console.error('[Sound] Failure sound load error:', err),
+      onplayerror: (_id, err) => {
+        console.error('[Sound] Failure sound play error:', err);
+        // Try to unlock and replay
+        Howler.ctx?.resume().then(() => {
+          failureSound?.play();
+        });
+      },
+    });
 
-  try {
-    if (successAudio) {
-      successAudio.currentTime = 0;
-      await successAudio.play();
+    // Unlock audio context on mobile
+    if (Howler.ctx && Howler.ctx.state === 'suspended') {
+      Howler.ctx.resume().then(() => {
+        console.log('[Sound] Audio context resumed');
+      });
     }
+
+    initialized = true;
+    console.log('[Sound] Initialization complete');
   } catch (error) {
-    console.error('Error playing success sound:', error);
+    console.error('[Sound] Failed to initialize:', error);
   }
 };
 
 /**
- * Play a failure/error sound - for invalid/used ticket scans
+ * Play success sound - for valid ticket scans
  */
-export const playFailureSound = async (): Promise<void> => {
-  if (!audioInitialized) {
-    await initAudio();
+export const playSuccessSound = (): void => {
+  console.log('[Sound] Playing success sound');
+  
+  if (!initialized) {
+    initAudio();
   }
 
-  try {
-    if (failureAudio) {
-      failureAudio.currentTime = 0;
-      await failureAudio.play();
-    }
-  } catch (error) {
-    console.error('Error playing failure sound:', error);
+  if (successSound) {
+    // Stop any currently playing instance and play fresh
+    successSound.stop();
+    successSound.play();
+  } else {
+    console.warn('[Sound] Success sound not available');
   }
 };
 
 /**
- * Play a warning sound - for "already used" tickets (uses failure sound)
+ * Play failure/error sound - for invalid/used ticket scans
  */
-export const playWarningSound = async (): Promise<void> => {
-  await playFailureSound();
+export const playFailureSound = (): void => {
+  console.log('[Sound] Playing failure sound');
+  
+  if (!initialized) {
+    initAudio();
+  }
+
+  if (failureSound) {
+    // Stop any currently playing instance and play fresh
+    failureSound.stop();
+    failureSound.play();
+  } else {
+    console.warn('[Sound] Failure sound not available');
+  }
 };
 
 /**
- * Play a simple beep - for scan detection (uses success sound)
+ * Play warning sound - for "already used" tickets
  */
-export const playBeep = async (): Promise<void> => {
-  await playSuccessSound();
+export const playWarningSound = (): void => {
+  playFailureSound();
+};
+
+/**
+ * Play beep sound
+ */
+export const playBeep = (): void => {
+  playSuccessSound();
+};
+
+/**
+ * Check if audio is ready
+ */
+export const isAudioReady = (): boolean => initialized;
+
+/**
+ * Unlock audio (call on user gesture)
+ */
+export const unlockAudio = (): void => {
+  if (Howler.ctx && Howler.ctx.state === 'suspended') {
+    Howler.ctx.resume();
+  }
+  // Also init if not done
+  if (!initialized) {
+    initAudio();
+  }
 };
 
 /**
@@ -87,6 +149,8 @@ export const SoundPlayer = {
   warning: playWarningSound,
   beep: playBeep,
   init: initAudio,
+  unlock: unlockAudio,
+  isReady: isAudioReady,
 };
 
 export default SoundPlayer;

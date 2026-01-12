@@ -11,6 +11,7 @@ interface AuthState {
   // State
   session: string | null;
   deviceId: string;
+  gateName: string;
   isAuthenticated: boolean;
   eventDetails: EventDetails | null;
   rememberMe: boolean;
@@ -19,6 +20,7 @@ interface AuthState {
   login: (session: string, event: EventDetails) => void;
   logout: () => void;
   setDeviceId: (id: string) => void;
+  setGateName: (name: string) => void;
   setRememberMe: (value: boolean) => void;
   setSession: (session: string | null) => void;
 }
@@ -29,6 +31,7 @@ export const useAuthStore = create<AuthState>()(
       // Initial state
       session: null,
       deviceId: generateDeviceId(),
+      gateName: '',
       isAuthenticated: false,
       eventDetails: null,
       rememberMe: true,
@@ -50,6 +53,8 @@ export const useAuthStore = create<AuthState>()(
 
       setDeviceId: (deviceId) => set({ deviceId }),
 
+      setGateName: (gateName) => set({ gateName }),
+
       setRememberMe: (rememberMe) => set({ rememberMe }),
 
       setSession: (session) =>
@@ -64,6 +69,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         session: state.rememberMe ? state.session : null,
         deviceId: state.deviceId,
+        gateName: state.gateName,
         rememberMe: state.rememberMe,
         eventDetails: state.rememberMe ? state.eventDetails : null,
         isAuthenticated: state.rememberMe ? state.isAuthenticated : false,

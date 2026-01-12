@@ -10,7 +10,7 @@ export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { deviceId, eventDetails, logout, session } = useAuthStore();
+  const { deviceId, gateName, setGateName, eventDetails, logout, session } = useAuthStore();
   const {
     selectedTicketTypes,
     setTicketTypes,
@@ -257,6 +257,17 @@ export const SettingsPage: React.FC = () => {
             <div className="flex justify-between">
               <span className="text-text-secondary">Device ID</span>
               <span className="font-mono text-sm">{deviceId}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-text-secondary">Gate Name</span>
+              <input
+                type="text"
+                value={gateName}
+                onChange={(e) => setGateName(e.target.value)}
+                placeholder="e.g. Main Entrance"
+                className="text-sm px-2 py-1 border border-border rounded bg-surface text-text-primary placeholder:text-text-tertiary w-36 text-right"
+                aria-label="Gate name (optional)"
+              />
             </div>
             <div className="flex justify-between">
               <span className="text-text-secondary">Downloaded Tickets</span>
