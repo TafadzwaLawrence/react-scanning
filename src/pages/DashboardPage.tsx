@@ -16,7 +16,7 @@ import type { HourlyScanData } from '@/types';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { eventDetails, deviceId } = useAuthStore();
+  const { eventDetails, deviceId, gateName } = useAuthStore();
   const { selectedTicketTypes } = useEventStore();
   const { isOnline, lastSyncTime, totalScans, syncedScans } = useSyncStore();
 
@@ -54,38 +54,24 @@ export const DashboardPage: React.FC = () => {
 
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
+  
+  const remainingTickets = totalTickets - scannedCount;
+  const scannedPercentage = totalTickets > 0 ? Math.round((scannedCount / totalTickets) * 100) : 0;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        <div className="bg-surface border-b border-border text-text-primary p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold">
-                <Skeleton width="w-48" height="h-6" />
-              </h1>
-              <p className="text-sm text-text-secondary mt-1">
-                <Skeleton width="w-32" />
-              </p>
-            </div>
-            <div>
-              <Skeleton width="w-16" height="h-6" />
-            </div>
-          </div>
+      <div className="min-h-screen bg-muted pb-20">
+        <div className="bg-secondary text-white p-6 pb-16 rounded-b-3xl">
+          <Skeleton width="w-48" height="h-6" className="bg-white/20" />
+          <Skeleton width="w-32" height="h-4" className="bg-white/20 mt-2" />
         </div>
-
-        <div className="p-4 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Card variant="elevated" padding="md"><Skeleton height="h-12"/></Card>
-            <Card variant="elevated" padding="md"><Skeleton height="h-12"/></Card>
-            <Card variant="elevated" padding="md"><Skeleton height="h-12"/></Card>
-            <Card variant="elevated" padding="md"><Skeleton height="h-12"/></Card>
+        <div className="px-4 -mt-10 space-y-4">
+          <Card variant="elevated" padding="lg"><Skeleton height="h-24"/></Card>
+          <div className="grid grid-cols-3 gap-3">
+            <Card variant="elevated" padding="md"><Skeleton height="h-16"/></Card>
+            <Card variant="elevated" padding="md"><Skeleton height="h-16"/></Card>
+            <Card variant="elevated" padding="md"><Skeleton height="h-16"/></Card>
           </div>
-
-          <Card variant="elevated" padding="md">
-            <h2 className="text-sm font-semibold text-text-secondary mb-4"><Skeleton width="w-32"/></h2>
-            <div className="h-48"><Skeleton height="h-48"/></div>
-          </Card>
         </div>
       </div>
     );
@@ -94,46 +80,38 @@ export const DashboardPage: React.FC = () => {
   // Show setup prompt if no tickets downloaded
   if (totalTickets === 0) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        {/* Header */}
-        <div className="bg-surface border-b border-border text-text-primary p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-text-primary">
-                {eventDetails?.event_name || 'Dashboard'}
-              </h1>
-              <p className="text-sm text-text-secondary mt-1">
-                Device: <span className="font-mono">{deviceId}</span>
-              </p>
-            </div>
+      <div className="min-h-screen bg-muted pb-20">
+        {/* Hero Header */}
+        <div className="bg-secondary text-white p-6 pb-20 rounded-b-3xl">
+          <div className="flex items-center justify-between mb-2">
             <Badge variant={isOnline ? 'success' : 'error'} size="sm">
-              {isOnline ? 'Online' : 'Offline'}
+              {isOnline ? '● Online' : '● Offline'}
             </Badge>
           </div>
+          <h1 className="text-2xl font-bold">
+            {eventDetails?.event_name || 'Dashboard'}
+          </h1>
+          <p className="text-white/70 text-sm mt-1">
+            Device: {deviceId} {gateName && `• ${gateName}`}
+          </p>
         </div>
 
-        <div className="p-4 flex flex-col items-center justify-center" style={{ minHeight: 'calc(100vh - 200px)' }}>
-          <Card variant="elevated" padding="lg" className="w-full max-w-sm text-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <div className="px-4 -mt-12">
+          <Card variant="elevated" padding="lg" className="text-center shadow-xl">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-text-primary mb-2">Setup Required</h2>
+            <h2 className="text-xl font-bold text-text-primary mb-2">Download Tickets</h2>
             <p className="text-sm text-text-secondary mb-6">
-              You need to download tickets before you can start scanning. Go to Settings to select ticket types and download.
+              Download tickets to start scanning. Go to Settings to select ticket types.
             </p>
             <Button
               variant="primary"
               fullWidth
-              className="bg-black text-white hover:bg-black/90"
+              size="lg"
               onClick={() => navigate('/settings')}
-              leftIcon={
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              }
             >
               Go to Settings
             </Button>
@@ -144,171 +122,204 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="bg-surface border-b border-border text-text-primary p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">
-              {eventDetails?.event_name || 'Dashboard'}
-            </h1>
-            <p className="text-sm text-text-secondary mt-1">
-              Device: <span className="font-mono">{deviceId}</span>
-            </p>
-          </div>
+    <div className="min-h-screen bg-muted pb-20">
+      {/* Hero Header */}
+      <div className="bg-secondary text-white p-6 pb-20 rounded-b-3xl">
+        <div className="flex items-center justify-between mb-4">
           <Badge variant={isOnline ? 'success' : 'error'} size="sm">
-            {isOnline ? 'Online' : 'Offline'}
+            {isOnline ? '● Online' : '● Offline'}
           </Badge>
+          <button 
+            onClick={() => navigate('/settings')}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            aria-label="Settings"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
         </div>
+        <h1 className="text-2xl font-bold">
+          {eventDetails?.event_name || 'Dashboard'}
+        </h1>
+        <p className="text-white/70 text-sm mt-1">
+          Device: {deviceId} {gateName && `• ${gateName}`}
+        </p>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* Quick Stats */}
+      {/* Main Stats Card - Floating */}
+      <div className="px-4 -mt-12">
+        <Card variant="elevated" padding="lg" className="shadow-xl">
+          {/* Primary Scan Button */}
+          <button
+            onClick={() => navigate('/scanner')}
+            className="w-full bg-primary hover:bg-primary-dark text-white rounded-2xl p-6 mb-6 transition-all active:scale-[0.98] shadow-lg"
+          >
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <p className="text-xl font-bold">Start Scanning</p>
+                <p className="text-white/80 text-sm">Tap to open camera</p>
+              </div>
+            </div>
+          </button>
+
+          {/* Progress Ring */}
+          <div className="flex items-center gap-6 mb-6">
+            <div className="relative w-24 h-24">
+              <svg className="w-24 h-24 transform -rotate-90">
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  fill="none"
+                  className="text-muted"
+                />
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  fill="none"
+                  strokeDasharray={251.2}
+                  strokeDashoffset={251.2 - (251.2 * scannedPercentage) / 100}
+                  className="text-success transition-all duration-500"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xl font-bold text-text-primary">{scannedPercentage}%</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-3xl font-bold text-text-primary">{scannedCount}</p>
+              <p className="text-sm text-text-secondary">of {totalTickets} scanned</p>
+              <p className="text-xs text-text-tertiary mt-1">{remainingTickets} remaining</p>
+            </div>
+          </div>
+
+          {/* Quick Stats Row */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-muted rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-success">{scannedCount}</p>
+              <p className="text-xs text-text-secondary">Scanned</p>
+            </div>
+            <div className="bg-muted rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-warning">{unsyncedCount}</p>
+              <p className="text-xs text-text-secondary">Pending</p>
+            </div>
+            <div className="bg-muted rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-secondary">{syncPercentage}%</p>
+              <p className="text-xs text-text-secondary">Synced</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div className="px-4 mt-4 space-y-4">
+        {/* Hourly Chart */}
+        {hourlyData.length > 0 && (
+          <Card variant="elevated" padding="md">
+            <h2 className="text-sm font-semibold text-text-secondary mb-4">
+              Today's Activity
+            </h2>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={hourlyData}>
+                  <XAxis
+                    dataKey="hour"
+                    tick={{ fontSize: 10 }}
+                    interval={2}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis tick={{ fontSize: 10 }} width={25} axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: 'none', 
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Bar dataKey="count" fill="#ff6600" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        )}
+
+        {/* Ticket Types & Sync Row */}
         <div className="grid grid-cols-2 gap-3">
-          <Card variant="elevated" padding="md">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-text-primary">{totalTickets}</p>
-              <p className="text-xs text-text-secondary mt-1">Total Tickets</p>
-            </div>
+          {/* Active Types */}
+          <Card variant="elevated" padding="md" className="col-span-1">
+            <h3 className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-2">
+              Ticket Types
+            </h3>
+            {selectedTicketTypes.length > 0 ? (
+              <div className="space-y-1">
+                {selectedTicketTypes.slice(0, 3).map((type) => (
+                  <Badge key={type} variant="info" size="sm" className="mr-1">
+                    {type}
+                  </Badge>
+                ))}
+                {selectedTicketTypes.length > 3 && (
+                  <span className="text-xs text-text-tertiary">+{selectedTicketTypes.length - 3} more</span>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-text-tertiary">None selected</p>
+            )}
           </Card>
 
-          <Card variant="elevated" padding="md">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-success">{scannedCount}</p>
-              <p className="text-xs text-text-secondary mt-1">Scanned</p>
-            </div>
-          </Card>
-
-          <Card variant="elevated" padding="md">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-primary">{unsyncedCount}</p>
-              <p className="text-xs text-text-secondary mt-1">Pending Sync</p>
-            </div>
-          </Card>
-
-          <Card variant="elevated" padding="md">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-secondary">{syncPercentage}%</p>
-              <p className="text-xs text-text-secondary mt-1">Sync Progress</p>
-            </div>
+          {/* Last Sync */}
+          <Card variant="elevated" padding="md" className="col-span-1">
+            <h3 className="text-xs font-semibold text-text-tertiary uppercase tracking-wide mb-2">
+              Last Sync
+            </h3>
+            <p className="text-sm font-medium text-text-primary">
+              {lastSyncTime
+                ? format(new Date(lastSyncTime), 'h:mm a')
+                : 'Never'}
+            </p>
+            <p className="text-xs text-text-tertiary">
+              {lastSyncTime
+                ? format(new Date(lastSyncTime), 'MMM d')
+                : 'Not synced yet'}
+            </p>
           </Card>
         </div>
 
-        {/* Hourly Chart */}
-        <Card variant="elevated" padding="md">
-                <h2 className="text-sm font-semibold text-text-secondary mb-4">
-            Scans by Hour
-          </h2>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={hourlyData}>
-                <XAxis
-                  dataKey="hour"
-                  tick={{ fontSize: 10 }}
-                  interval={2}
-                />
-                <YAxis tick={{ fontSize: 10 }} width={30} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#00007c" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        {/* Active Ticket Types */}
-        <Card variant="elevated" padding="md">
-          <h2 className="text-sm font-semibold text-text-secondary mb-3">
-            Active Ticket Types
-          </h2>
-          {selectedTicketTypes.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {selectedTicketTypes.map((type) => (
-                <Badge key={type} variant="info" size="md">
-                  {type}
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-text-secondary">No ticket types selected</p>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-3"
-            onClick={() => navigate('/settings')}
-          >
-            Change Types
-          </Button>
-        </Card>
-
-        {/* Last Sync */}
-        <Card variant="filled" padding="md">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-text-secondary">Last sync</p>
-              <p className="text-sm font-medium text-text-primary">
-                {lastSyncTime
-                  ? format(new Date(lastSyncTime), 'MMM d, h:mm a')
-                  : 'Never'}
-              </p>
-            </div>
-            <svg
-              className={`w-5 h-5 ${
-                isOnline ? 'text-success' : 'text-text-tertiary'
-              }`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          </div>
-        </Card>
-
-        {/* Scan Button */}
-        <Button
-          variant="primary"
-          size="lg"
-          fullWidth
-          className="bg-black text-white hover:bg-black/90"
-          onClick={() => navigate('/scanner')}
-          leftIcon={
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
-          }
-        >
-          Start Scanning
-        </Button>
-
         {/* Terms and Conditions */}
-        <div className="text-center text-xs text-text-tertiary space-y-2 pt-2">
+        <div className="text-center text-xs text-text-tertiary space-y-1 pt-4 pb-2">
           <p>
-            By using this app, you agree to our{' '}
             <a 
               href="https://263tickets.com/terms" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-primary underline hover:text-primary-dark"
+              className="text-text-secondary hover:text-primary"
             >
-              Terms of Service
-            </a>{' '}
-            and{' '}
+              Terms
+            </a>
+            {' • '}
             <a 
               href="https://263tickets.com/privacy" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-primary underline hover:text-primary-dark"
+              className="text-text-secondary hover:text-primary"
             >
-              Privacy Policy
+              Privacy
             </a>
           </p>
-          <p>© 2026 263tickets. All rights reserved.</p>
+          <p>© 2026 263tickets</p>
         </div>
       </div>
     </div>
