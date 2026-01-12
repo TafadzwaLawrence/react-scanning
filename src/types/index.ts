@@ -178,10 +178,19 @@ export interface BatchSyncPayload {
   scans: ScanForSync[];
 }
 
+export interface BatchSyncResultItem {
+  qrcode: string;
+  status: 200 | 403 | 404;
+  type?: string;
+  admittence?: string;
+  number?: string;
+  scanned_at?: number;
+}
+
 export interface BatchSyncResponse {
   status: number;
-  synced_count?: number;
-  message?: string;
+  success_count: number;
+  results: BatchSyncResultItem[];
 }
 
 // Configuration Types

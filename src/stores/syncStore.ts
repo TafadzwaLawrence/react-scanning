@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { generateUUID } from '@/utils';
-import { syncAPI } from '@/services/api';
+import { ticketsAPI } from '@/services/api';
 
 type SyncStatusType = 'idle' | 'syncing' | 'success' | 'error';
 
@@ -18,10 +18,10 @@ interface SyncResult {
   success: boolean;
   message?: string;
   summary?: {
-    total_uploaded: number;
+    total: number;
     successful: number;
-    duplicates: number;
-    failed: number;
+    alreadyScanned: number;
+    notFound: number;
   };
 }
 
@@ -47,7 +47,7 @@ interface SyncState {
   setOnline: (online: boolean) => void;
   setProgress: (progress: number) => void;
   updateSyncStats: (total: number, synced: number) => void;
-  syncToServer: (eventId: string, deviceId: string, sessionToken: string, gateName?: string) => Promise<SyncResult>;
+  syncToServer: () => Promise<SyncResult>;
 }
 
 export const useSyncStore = create<SyncState>()(
@@ -110,8 +110,8 @@ export const useSyncStore = create<SyncState>()(
       updateSyncStats: (total, synced) =>
         set({ totalScans: total, syncedScans: synced }),
 
-      // Sync pending scans to server
-      syncToServer: async (eventId: string, deviceId: string, sessionToken: string, gateName?: string): Promise<SyncResult> => {
+      // Sync pending scans to server using existing batchVerifyTickets endpoint
+      syncToServer: async (): Promise<SyncResult> => {
         const state = get();
         
         if (!state.isOnline) {
@@ -134,23 +134,42 @@ export const useSyncStore = create<SyncState>()(
         });
 
         try {
-          const response = await syncAPI.syncScans(
-            eventId,
-            deviceId,
-            sessionToken,
-            state.pendingScans.map(scan => ({
-              qrCode: scan.qrCode,
-              scannedAt: scan.scannedAt,
-              ticketTypes: scan.ticketTypes,
+          // Format scans for the existing batchVerifyTickets endpoint
+          const payload = {
+            scans: state.pendingScans.map(scan => ({
+              qrcode: scan.qrCode,
+              device_id: scan.deviceId,
+              scanned_at: Math.floor(scan.scannedAt / 1000), // Convert to seconds if in ms
             })),
-            gateName
-          );
+          };
 
-          // Remove successfully synced scans (synced or duplicate)
-          const syncedQRCodes = response.results
-            .filter(r => r.sync_status === 'synced' || r.sync_status === 'duplicate')
-            .map(r => r.qrcode);
+          const response = await ticketsAPI.batchSync(payload);
 
+          // Process results from the API
+          // status 200 = synced, status 403 = already scanned, status 404 = not found
+          const results = (response as any).results || [];
+          
+          let successful = 0;
+          let alreadyScanned = 0;
+          let notFound = 0;
+          const syncedQRCodes: string[] = [];
+
+          for (const result of results) {
+            if (result.status === 200) {
+              successful++;
+              syncedQRCodes.push(result.qrcode);
+            } else if (result.status === 403) {
+              alreadyScanned++;
+              // Still remove from pending - it's already scanned on server
+              syncedQRCodes.push(result.qrcode);
+            } else if (result.status === 404) {
+              notFound++;
+              // Remove from pending - ticket doesn't exist
+              syncedQRCodes.push(result.qrcode);
+            }
+          }
+
+          // Remove synced/processed scans from pending
           const remainingScans = state.pendingScans.filter(
             scan => !syncedQRCodes.includes(scan.qrCode)
           );
@@ -158,18 +177,21 @@ export const useSyncStore = create<SyncState>()(
           set({
             pendingScans: remainingScans,
             lastSyncTime: Date.now(),
-            syncedScans: state.syncedScans + response.summary.successful,
-            status: remainingScans.length > 0 ? 'error' : 'success',
+            syncedScans: state.syncedScans + successful,
+            status: 'success',
             isSyncing: false,
             syncProgress: 100,
-            errorMessage: remainingScans.length > 0 
-              ? `${response.summary.failed} scans failed to sync` 
-              : null,
+            errorMessage: null,
           });
 
           return {
             success: true,
-            summary: response.summary,
+            summary: {
+              total: state.pendingScans.length,
+              successful,
+              alreadyScanned,
+              notFound,
+            },
           };
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Sync failed';
