@@ -120,6 +120,82 @@ export const ticketsAPI = {
   },
 };
 
+// Sync API - for syncing offline scans to server
+export const syncAPI = {
+  /**
+   * Sync pending offline scans to the server
+   */
+  syncScans: async (
+    eventId: string,
+    deviceId: string,
+    sessionToken: string,
+    scans: Array<{ qrCode: string; scannedAt: number; ticketTypes?: string[] }>,
+    gateName?: string
+  ): Promise<SyncResponse> => {
+    const response = await api.post<SyncResponse>('/offline/sync', {
+      event_id: eventId,
+      device_id: deviceId,
+      session_token: sessionToken,
+      gate_name: gateName,
+      scans: scans.map(scan => ({
+        qrcode: scan.qrCode,
+        scanned_at: scan.scannedAt,
+        ticket_types: scan.ticketTypes,
+      })),
+    });
+    return response.data;
+  },
+
+  /**
+   * Get sync status for this device
+   */
+  getSyncStatus: async (eventId: string, deviceId: string): Promise<SyncStatusResponse> => {
+    const response = await api.get<SyncStatusResponse>(`/offline/sync/status/${eventId}/${deviceId}`);
+    return response.data;
+  },
+};
+
+// Sync Response Types
+export interface SyncResponse {
+  status: number;
+  message: string;
+  summary: {
+    total_uploaded: number;
+    successful: number;
+    duplicates: number;
+    failed: number;
+  };
+  results: Array<{
+    qrcode: string;
+    status: number;
+    message: string;
+    sync_status: 'synced' | 'duplicate' | 'conflict' | 'failed';
+    type?: string;
+    number?: string;
+    scanned_at?: string;
+    scanned_by?: string;
+  }>;
+  sync_session_id: number;
+  synced_at: string;
+}
+
+export interface SyncStatusResponse {
+  status: number;
+  event_id: string;
+  device_id: string;
+  total_scans: number;
+  pending_scans: number;
+  last_sync: {
+    session_id: number;
+    scans_uploaded: number;
+    scans_successful: number;
+    scans_failed: number;
+    completed_at: string;
+    status: string;
+  } | null;
+  timestamp: string;
+}
+
 // Reports API
 export const reportsAPI = {
   getReconciliation: async (eventId: string): Promise<ReconciliationReport> => {
