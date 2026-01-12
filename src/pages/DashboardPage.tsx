@@ -197,38 +197,6 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       <div className="px-4 mt-4 space-y-4">
-        {/* Hourly Chart */}
-        {hourlyData.length > 0 && (
-          <Card variant="elevated" padding="md">
-            <h2 className="text-sm font-semibold text-text-secondary mb-4">
-              Today's Activity
-            </h2>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={hourlyData}>
-                  <XAxis
-                    dataKey="hour"
-                    tick={{ fontSize: 10 }}
-                    interval={2}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis tick={{ fontSize: 10 }} width={25} axisLine={false} tickLine={false} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: 'none', 
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                    }}
-                  />
-                  <Bar dataKey="count" fill="#00007c" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-        )}
-
         {/* Ticket Types & Sync Row */}
         <div className="grid grid-cols-2 gap-3">
           {/* Active Types */}
@@ -269,6 +237,38 @@ export const DashboardPage: React.FC = () => {
             </p>
           </Card>
         </div>
+
+        {/* Hourly Chart */}
+        {hourlyData.length > 0 && (
+          <Card variant="elevated" padding="md">
+            <h2 className="text-sm font-semibold text-text-secondary mb-4">
+              Today's Activity
+            </h2>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={hourlyData}>
+                  <XAxis
+                    dataKey="hour"
+                    tick={{ fontSize: 10 }}
+                    interval={2}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis tick={{ fontSize: 10 }} width={25} axisLine={false} tickLine={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: 'none', 
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                  />
+                  <Bar dataKey="count" fill="#00007c" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        )}
 
         {/* Terms and Conditions */}
         <div className="text-center text-xs text-text-tertiary space-y-1 pt-4 pb-2">
