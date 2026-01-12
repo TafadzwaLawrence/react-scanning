@@ -22,7 +22,7 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { eventDetails, deviceId, gateName } = useAuthStore();
   const { selectedTicketTypes } = useEventStore();
-  const { isOnline, lastSyncTime, totalScans, syncedScans } = useSyncStore();
+  const { lastSyncTime, totalScans, syncedScans } = useSyncStore();
 
   const [isLoading, setIsLoading] = useState(true);
   const [totalTickets, setTotalTickets] = useState(0);
@@ -87,11 +87,6 @@ export const DashboardPage: React.FC = () => {
       <div className="min-h-screen bg-muted pb-20">
         {/* Header */}
         <div className="bg-surface border-b border-border p-6 pb-20">
-          <div className="flex items-center justify-between mb-2">
-            <Badge variant={isOnline ? 'success' : 'error'} size="sm">
-              {isOnline ? '● Online' : '● Offline'}
-            </Badge>
-          </div>
           <h1 className="text-2xl font-bold text-text-primary">
             {eventDetails?.event_name || 'Dashboard'}
           </h1>
@@ -130,9 +125,9 @@ export const DashboardPage: React.FC = () => {
       {/* Header */}
       <div className="bg-surface border-b border-border p-6 pb-20">
         <div className="flex items-center justify-between mb-4">
-          <Badge variant={isOnline ? 'success' : 'error'} size="sm">
-            {isOnline ? '● Online' : '● Offline'}
-          </Badge>
+          <h1 className="text-2xl font-bold text-text-primary">
+            {eventDetails?.event_name || 'Dashboard'}
+          </h1>
           <button 
             onClick={() => navigate('/settings')}
             className="p-2 rounded-full bg-muted hover:bg-border transition-colors"
@@ -144,10 +139,7 @@ export const DashboardPage: React.FC = () => {
             </svg>
           </button>
         </div>
-        <h1 className="text-2xl font-bold text-text-primary">
-          {eventDetails?.event_name || 'Dashboard'}
-        </h1>
-        <p className="text-text-secondary text-sm mt-1">
+        <p className="text-text-secondary text-sm">
           Device: {deviceId} {gateName && `• ${gateName}`}
         </p>
       </div>
