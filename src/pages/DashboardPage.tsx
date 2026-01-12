@@ -250,7 +250,7 @@ export const DashboardPage: React.FC = () => {
                       boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                     }}
                   />
-                  <Bar dataKey="count" fill="#ff6600" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill="#00007c" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
