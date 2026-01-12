@@ -112,11 +112,14 @@ export class SyncClient {
   }
 
   /**
-   * Sync scans using existing batchVerifyTickets endpoint
-   * POST /event/batch_verify
+   * Sync scans using the sync endpoint with full tracking
+   * POST /sync/scans
+   * This logs all scans to device_scan_logs table
    */
   async syncScans(
     scans: ScanPayload[],
+    eventId: string,
+    gateName?: string,
     onProgress?: (synced: number, total: number) => void
   ): Promise<{
     success: boolean;
@@ -132,7 +135,7 @@ export class SyncClient {
     // Process in batches
     for (let i = 0; i < scans.length; i += this.config.batch_size) {
       const batch = scans.slice(i, i + this.config.batch_size);
-      const batchResult = await this.syncBatch(batch);
+      const batchResult = await this.syncBatch(batch, eventId, gateName);
 
       // Process results
       for (const result of batchResult.results) {
@@ -173,12 +176,19 @@ export class SyncClient {
 
   /**
    * Sync a single batch with retry logic
+   * Uses /sync/scans endpoint for full device tracking
    */
-  private async syncBatch(scans: ScanPayload[]): Promise<BatchResult> {
+  private async syncBatch(
+    scans: ScanPayload[],
+    eventId: string,
+    gateName?: string
+  ): Promise<BatchResult> {
     const payload = {
+      device_id: scans[0]?.device_id || 'unknown',
+      event_id: eventId,
+      gate_name: gateName,
       scans: scans.map(s => ({
         qrcode: s.qrcode,
-        device_id: s.device_id,
         scanned_at: s.scanned_at,
       })),
     };
@@ -189,17 +199,28 @@ export class SyncClient {
       const response = await makeRequest<{
         status: number;
         success_count: number;
+        summary: {
+          total_uploaded: number;
+          successful: number;
+          duplicates: number;
+          not_found: number;
+          failed: number;
+        };
         results: Array<{
           qrcode: string;
           status: number;
+          message: string;
+          sync_status: string;
           type?: string;
           number?: string;
           admittence?: number;
           scanned_at?: string;
           scanned_by?: string;
         }>;
+        sync_session_id: number;
+        synced_at: string;
       }>(
-        `${this.baseUrl}/event/batch_verify`,
+        `${this.baseUrl}/sync/scans`,
         {
           method: 'POST',
           headers: this.getHeaders(),

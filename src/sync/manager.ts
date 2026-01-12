@@ -132,6 +132,7 @@ export async function getStats(): Promise<QueueStats> {
  */
 export async function syncAll(
   eventId: string,
+  gateName?: string,
   onProgress?: (progress: SyncProgress) => void
 ): Promise<{
   success: boolean;
@@ -206,8 +207,8 @@ export async function syncAll(
       ticket_types: s.ticket_types,
     }));
 
-    // Sync to server
-    const result = await client.syncScans(scanPayloads, (current, total) => {
+    // Sync to server - uses /sync/scans endpoint which logs to device_scan_logs
+    const result = await client.syncScans(scanPayloads, eventId, gateName, (current, total) => {
       syncState.progress = {
         total,
         current,
@@ -506,21 +507,27 @@ function saveSyncState(): void {
 
 let autoSyncInterval: ReturnType<typeof setInterval> | null = null;
 let currentEventId: string | null = null;
+let currentGateName: string | null = null;
 
 /**
  * Start automatic syncing at specified interval
  */
-export function startAutoSync(eventId: string, intervalMs: number = 60000): void {
+export function startAutoSync(
+  eventId: string,
+  gateName?: string,
+  intervalMs: number = 60000
+): void {
   stopAutoSync();
   currentEventId = eventId;
+  currentGateName = gateName || null;
 
   // Sync immediately
-  syncAll(eventId);
+  syncAll(eventId, gateName);
 
   // Then sync at interval
   autoSyncInterval = setInterval(() => {
     if (canSync() && currentEventId) {
-      syncAll(currentEventId);
+      syncAll(currentEventId, currentGateName || undefined);
     }
   }, intervalMs);
 
@@ -538,6 +545,7 @@ export function stopAutoSync(): void {
   }
   window.removeEventListener('online', handleOnline);
   currentEventId = null;
+  currentGateName = null;
 }
 
 function handleOnline(): void {
@@ -545,7 +553,7 @@ function handleOnline(): void {
     // Small delay to ensure connection is stable
     setTimeout(() => {
       if (canSync() && currentEventId) {
-        syncAll(currentEventId);
+        syncAll(currentEventId, currentGateName || undefined);
       }
     }, 2000);
   }

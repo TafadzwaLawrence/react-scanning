@@ -12,8 +12,13 @@ import { BottomNav, OfflineIndicator } from '@/components/layout';
 import { ToastContainer } from '@/components/ui';
 import { PWAUpdatePrompt } from '@/components/pwa';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { useSyncStore } from '@/stores';
+import { useSyncStore, useAuthStore } from '@/stores';
 import { useThemeColor } from '@/hooks';
+import { initSync, setSyncAuthToken } from '@/sync';
+
+// Initialize sync on app load
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.263tickets.com/api/v1';
+initSync(API_BASE_URL);
 
 // Updates status bar color to match page headers
 function ThemeColorManager() {
@@ -24,8 +29,9 @@ function ThemeColorManager() {
 function AppContent() {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
+  const session = useAuthStore((state) => state.session);
 
-  // Setup online/offline listeners
+  // Setup online/offline listeners and sync auth token
   useEffect(() => {
     const setOnline = useSyncStore.getState().setOnline;
 
@@ -43,6 +49,11 @@ function AppContent() {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Update sync auth token when session changes
+  useEffect(() => {
+    setSyncAuthToken(session);
+  }, [session]);
 
   return (
     <>

@@ -24,6 +24,7 @@ interface UseSyncOptions {
   apiBaseUrl: string;
   authToken?: string;
   eventId: string;
+  gateName?: string;
   autoSync?: boolean;
   autoSyncInterval?: number; // ms
 }
@@ -49,7 +50,7 @@ interface UseSyncReturn {
  * React hook for managing sync state and operations
  */
 export function useSync(options: UseSyncOptions): UseSyncReturn {
-  const { apiBaseUrl, authToken, eventId, autoSync = false, autoSyncInterval = 60000 } = options;
+  const { apiBaseUrl, authToken, eventId, gateName, autoSync = false, autoSyncInterval = 60000 } = options;
 
   const [status, setStatus] = useState<SyncStatus | null>(null);
   const [stats, setStats] = useState<QueueStats | null>(null);
@@ -95,10 +96,10 @@ export function useSync(options: UseSyncOptions): UseSyncReturn {
   // Auto-sync
   useEffect(() => {
     if (autoSync && eventId) {
-      startAutoSync(eventId, autoSyncInterval);
+      startAutoSync(eventId, gateName, autoSyncInterval);
       return () => stopAutoSync();
     }
-  }, [autoSync, eventId, autoSyncInterval]);
+  }, [autoSync, eventId, gateName, autoSyncInterval]);
 
   const refreshData = useCallback(async () => {
     const [newStatus, newStats] = await Promise.all([
@@ -110,10 +111,10 @@ export function useSync(options: UseSyncOptions): UseSyncReturn {
   }, []);
 
   const sync = useCallback(async () => {
-    const result = await syncAll(eventId, setProgress);
+    const result = await syncAll(eventId, gateName, setProgress);
     await refreshData();
     return result;
-  }, [eventId, refreshData]);
+  }, [eventId, gateName, refreshData]);
 
   const exportData = useCallback(async () => {
     return exportAllData(eventId);
