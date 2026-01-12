@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Skeleton } from '@/components/ui';
 import { useAuthStore, useEventStore, useSyncStore } from '@/stores';
+import { useStatusBarColor, STATUS_BAR_COLORS } from '@/hooks';
 import { db } from '@/services/db';
 import { format } from 'date-fns';
 import {
@@ -15,6 +16,9 @@ import {
 import type { HourlyScanData } from '@/types';
 
 export const DashboardPage: React.FC = () => {
+  // Set status bar to navy to match the hero header
+  useStatusBarColor(STATUS_BAR_COLORS.SECONDARY);
+
   const navigate = useNavigate();
   const { eventDetails, deviceId, gateName } = useAuthStore();
   const { selectedTicketTypes } = useEventStore();

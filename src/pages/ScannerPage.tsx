@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { QRScanner, ScanResultDisplay, ScanStats, CameraPermission } from '@/components/scanner';
 import { Badge, Button, Card, Input, Modal } from '@/components/ui';
 import { useAuthStore, useEventStore, useScannerStore, useSyncStore, useSettingsStore, useToast } from '@/stores';
+import { useStatusBarColor, STATUS_BAR_COLORS } from '@/hooks';
 import { ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
 import { generateUUID } from '@/utils';
@@ -11,6 +12,9 @@ import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
 import { AxiosError } from 'axios';
 
 export const ScannerPage: React.FC = () => {
+  // Set status bar to white to match the header
+  useStatusBarColor(STATUS_BAR_COLORS.SURFACE);
+
   const navigate = useNavigate();
   const toast = useToast();
   const { deviceId, gateName, eventDetails } = useAuthStore();

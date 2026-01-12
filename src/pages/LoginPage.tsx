@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Input, Card, Checkbox } from '@/components/ui';
 import { useAuthStore, useSyncStore, useToast } from '@/stores';
+import { useStatusBarColor, STATUS_BAR_COLORS } from '@/hooks';
 import { authAPI } from '@/services/api';
 import { db } from '@/services/db';
 
 export const LoginPage: React.FC = () => {
+  // Set status bar to white/surface for the login page
+  useStatusBarColor(STATUS_BAR_COLORS.SURFACE);
+
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();

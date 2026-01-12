@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Skeleton } from '@/components/ui';
 import { useAuthStore, useSyncStore, useToast } from '@/stores';
+import { useStatusBarColor, STATUS_BAR_COLORS } from '@/hooks';
 import { reportsAPI } from '@/services/api';
 import type { ReconciliationReport } from '@/types';
 import { format } from 'date-fns';
 
 export const ReportsPage: React.FC = () => {
+  // Set status bar to white to match the header
+  useStatusBarColor(STATUS_BAR_COLORS.SURFACE);
+
   const toast = useToast();
   const { eventDetails } = useAuthStore();
   const { isOnline } = useSyncStore();

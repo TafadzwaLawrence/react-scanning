@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Modal, Badge, Checkbox, Loading } from '@/components/ui';
 import { useAuthStore, useEventStore, useSyncStore, useScannerStore, useSettingsStore, useToast } from '@/stores';
+import { useStatusBarColor, STATUS_BAR_COLORS } from '@/hooks';
 import { eventsAPI, authAPI, ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
 import type { TicketGroup } from '@/types';
 
 export const SettingsPage: React.FC = () => {
+  // Set status bar to white to match the header
+  useStatusBarColor(STATUS_BAR_COLORS.SURFACE);
+
   const navigate = useNavigate();
   const toast = useToast();
 

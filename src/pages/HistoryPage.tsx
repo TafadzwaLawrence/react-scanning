@@ -1,9 +1,13 @@
 import React from 'react';
 import { Card, Badge } from '@/components/ui';
 import { useScannerStore } from '@/stores';
+import { useStatusBarColor, STATUS_BAR_COLORS } from '@/hooks';
 import { format } from 'date-fns';
 
 export const HistoryPage: React.FC = () => {
+  // Set status bar to white to match the header
+  useStatusBarColor(STATUS_BAR_COLORS.SURFACE);
+
   const { scanHistory, stats } = useScannerStore();
 
   const getStatusConfig = (type: string) => {
