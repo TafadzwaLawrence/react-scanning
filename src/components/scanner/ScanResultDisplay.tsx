@@ -90,42 +90,37 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
   return (
     <div
       onClick={onDismiss}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 cursor-pointer animate-fade-in"
+      className={`fixed inset-0 z-50 flex items-center justify-center cursor-pointer ${config.bg} animate-fade-in`}
     >
       <div className="flex flex-col items-center animate-scale-in">
         {/* Circular icon container */}
         <div
-          className={`
-            w-32 h-32 rounded-full ${config.bg} ${config.ring}
-            ring-8 shadow-2xl
-            flex items-center justify-center
-            text-white
-          `}
+          className="w-36 h-36 rounded-full bg-white/20 ring-8 ring-white/10 shadow-2xl flex items-center justify-center text-white"
         >
           {config.icon}
         </div>
         
         {/* Title */}
-        <h2 className="mt-4 text-2xl font-bold text-white tracking-wider">
+        <h2 className="mt-6 text-3xl font-bold text-white tracking-wider">
           {config.title}
         </h2>
         
         {/* Ticket info */}
         {result.ticket && (
-          <p className="mt-2 text-base text-white/90">
+          <p className="mt-3 text-lg text-white/90">
             {result.ticket.type} • #{result.ticket.number}
           </p>
         )}
         
         {/* Message */}
         {result.message && (
-          <p className="mt-1 text-sm text-white/70 max-w-[250px] text-center">
+          <p className="mt-2 text-base text-white/80 max-w-[280px] text-center">
             {result.message}
           </p>
         )}
         
         {/* Tap to dismiss hint */}
-        <p className="mt-6 text-xs text-white/50">
+        <p className="mt-10 text-sm text-white/50">
           Tap anywhere to dismiss
         </p>
       </div>
