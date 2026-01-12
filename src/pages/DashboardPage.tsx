@@ -59,7 +59,6 @@ export const DashboardPage: React.FC = () => {
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
   
-  const remainingTickets = totalTickets - scannedCount;
   const scannedPercentage = totalTickets > 0 ? Math.round((scannedCount / totalTickets) * 100) : 0;
 
   if (isLoading) {
