@@ -165,40 +165,17 @@ export const DashboardPage: React.FC = () => {
             </div>
           </button>
 
-          {/* Progress Ring */}
-          <div className="flex items-center gap-6 mb-6">
-            <div className="relative w-24 h-24">
-              <svg className="w-24 h-24 transform -rotate-90">
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  className="text-muted"
-                />
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  stroke="currentColor"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={251.2}
-                  strokeDashoffset={251.2 - (251.2 * scannedPercentage) / 100}
-                  className="text-success transition-all duration-500"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xl font-bold text-text-primary">{scannedPercentage}%</span>
-              </div>
+          {/* Progress Bar */}
+          <div className="mb-6">
+            <div className="flex items-baseline justify-between mb-2">
+              <span className="text-2xl font-bold text-text-primary">{scannedCount}<span className="text-sm font-normal text-text-tertiary">/{totalTickets}</span></span>
+              <span className="text-sm text-text-secondary">{scannedPercentage}%</span>
             </div>
-            <div className="flex-1">
-              <p className="text-3xl font-bold text-text-primary">{scannedCount}</p>
-              <p className="text-sm text-text-secondary">of {totalTickets} scanned</p>
-              <p className="text-xs text-text-tertiary mt-1">{remainingTickets} remaining</p>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-success rounded-full transition-all duration-500"
+                style={{ width: `${scannedPercentage}%` }}
+              />
             </div>
           </div>
 
