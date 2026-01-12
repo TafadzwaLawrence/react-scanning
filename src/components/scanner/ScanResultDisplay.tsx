@@ -25,9 +25,9 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
   const configs = {
     valid: {
       bg: 'bg-success',
-      border: 'border-success/80',
+      ring: 'ring-success/30',
       icon: (
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
         </svg>
       ),
@@ -35,19 +35,19 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
     },
     used: {
       bg: 'bg-warning',
-      border: 'border-warning/80',
+      ring: 'ring-warning/30',
       icon: (
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
       ),
       title: 'ALREADY USED',
     },
     invalid: {
       bg: 'bg-error',
-      border: 'border-error/80',
+      ring: 'ring-error/30',
       icon: (
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
         </svg>
       ),
@@ -55,30 +55,30 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
     },
     'wrong-type': {
       bg: 'bg-warning',
-      border: 'border-warning/80',
+      ring: 'ring-warning/30',
       icon: (
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
         </svg>
       ),
       title: 'WRONG TYPE',
     },
     offline: {
       bg: 'bg-secondary',
-      border: 'border-secondary/80',
+      ring: 'ring-secondary/30',
       icon: (
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0" />
+        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0" />
         </svg>
       ),
       title: 'QUEUED',
     },
     error: {
       bg: 'bg-error',
-      border: 'border-error/80',
+      ring: 'ring-error/30',
       icon: (
-        <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
       title: 'ERROR',
@@ -88,58 +88,47 @@ export const ScanResultDisplay: React.FC<ScanResultDisplayProps> = ({
   const config = configs[result.type];
 
   return (
-    <>
-      <div
-        onClick={onDismiss}
-        className={`
-          fixed bottom-20 left-4 right-4 z-50
-          ${config.bg} ${config.border}
-          border-2 rounded-2xl shadow-2xl
-          text-white cursor-pointer
-          transform transition-all duration-200
-          animate-slide-up
-        `}
-      >
-        <div className="p-4 flex items-center gap-4">
-          {/* Icon */}
-          <div className="p-2.5 rounded-full bg-white/10 flex-shrink-0">
-            {config.icon}
-          </div>
-          
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-bold tracking-wide">{config.title}</h2>
-            
-            {result.ticket && (
-              <p className="text-sm opacity-90 truncate">
-                {result.ticket.type} • #{result.ticket.number}
-              </p>
-            )}
-            
-            {result.message && (
-              <p className="text-xs opacity-75 truncate mt-0.5">
-                {result.message}
-              </p>
-            )}
-          </div>
-          
-          {/* Dismiss hint */}
-          <div className="flex-shrink-0 opacity-60">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
+    <div
+      onClick={onDismiss}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 cursor-pointer animate-fade-in"
+    >
+      <div className="flex flex-col items-center animate-scale-in">
+        {/* Circular icon container */}
+        <div
+          className={`
+            w-32 h-32 rounded-full ${config.bg} ${config.ring}
+            ring-8 shadow-2xl
+            flex items-center justify-center
+            text-white
+          `}
+        >
+          {config.icon}
         </div>
         
-        <div className="h-1 bg-white/10 rounded-b-2xl overflow-hidden">
-          <div
-            className="h-full bg-white/30 animate-shrink-width"
-            style={{
-              animationDuration: `${result.type === 'valid' ? autoDismissMs : autoDismissMs + 500}ms`,
-            }}
-          />
-        </div>
+        {/* Title */}
+        <h2 className="mt-4 text-2xl font-bold text-white tracking-wider">
+          {config.title}
+        </h2>
+        
+        {/* Ticket info */}
+        {result.ticket && (
+          <p className="mt-2 text-base text-white/90">
+            {result.ticket.type} • #{result.ticket.number}
+          </p>
+        )}
+        
+        {/* Message */}
+        {result.message && (
+          <p className="mt-1 text-sm text-white/70 max-w-[250px] text-center">
+            {result.message}
+          </p>
+        )}
+        
+        {/* Tap to dismiss hint */}
+        <p className="mt-6 text-xs text-white/50">
+          Tap anywhere to dismiss
+        </p>
       </div>
-    </>
+    </div>
   );
 };
