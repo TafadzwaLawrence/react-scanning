@@ -8,6 +8,7 @@ import { ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
 import { generateUUID } from '@/utils';
 import { SoundPlayer } from '@/utils/sounds';
+import { addPendingScan as addToSyncQueue, startAutoSync, stopAutoSync, syncAll, canSync } from '@/sync';
 import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -41,6 +42,14 @@ export const ScannerPage: React.FC = () => {
 
   const syncPercentage =
     totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
+
+  // Start auto-sync when scanner page mounts
+  useEffect(() => {
+    if (eventId) {
+      startAutoSync(eventId, gateName, 30000); // Sync every 30 seconds
+      return () => stopAutoSync();
+    }
+  }, [eventId, gateName]);
 
   // Initialize audio on first user interaction
   useEffect(() => {
@@ -233,12 +242,28 @@ export const ScannerPage: React.FC = () => {
         requiredTypes: selectedTicketTypes,
       });
 
+      // Log ALL scans to sync queue for device_scan_logs tracking
+      // This ensures every scan attempt is recorded on the server
+      addToSyncQueue({
+        qrcode: qrCode,
+        eventId: eventId,
+        gateName: gateName || undefined,
+        ticketTypes: selectedTicketTypes.length > 0 ? selectedTicketTypes : undefined,
+      }).then(() => {
+        // Immediately sync to server if online
+        if (navigator.onLine && canSync()) {
+          syncAll(eventId, gateName || undefined).catch(err => 
+            console.error('[ScannerPage] Background sync failed:', err)
+          );
+        }
+      }).catch(err => console.error('[ScannerPage] Failed to queue scan for sync:', err));
+
       // Release lock after short delay
       setTimeout(() => {
         isProcessingRef.current = false;
       }, 300);
     },
-    [eventId, deviceId, selectedTicketTypes, isOnline, toast, vibrate, playSound, addScanResult, addPendingScan]
+    [eventId, deviceId, gateName, selectedTicketTypes, isOnline, toast, vibrate, playSound, addScanResult, addPendingScan]
   );
 
   const handleDismissResult = useCallback(() => {
