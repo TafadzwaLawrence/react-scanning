@@ -29,7 +29,7 @@ src/sync/
            └────────────────┼────────────────┘
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    Sync Manager                              │
+│                    Sync Manager                             │
 │                                                             │
 │   • Orchestrates sync operations                            │
 │   • Manages sync state                                      │

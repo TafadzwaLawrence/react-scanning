@@ -8,7 +8,7 @@ import { ticketsAPI } from '@/services/api';
 import { db } from '@/services/db';
 import { generateUUID } from '@/utils';
 import { SoundPlayer } from '@/utils/sounds';
-import { addPendingScan as addToSyncQueue, startAutoSync, stopAutoSync, syncAll, canSync } from '@/sync';
+import { addPendingScan as addToSyncQueue, startAutoSync, stopAutoSync, syncAll, canSync, getStats } from '@/sync';
 import type { ScanResult, ScanResultType, VerifyResponse } from '@/types';
 import { AxiosError } from 'axios';
 
@@ -21,8 +21,12 @@ export const ScannerPage: React.FC = () => {
   const { deviceId, gateName, eventDetails } = useAuthStore();
   const { selectedTicketTypes } = useEventStore();
   const { stats, addScanResult, lastScanResult, clearLastResult } = useScannerStore();
-  const { isOnline, addPendingScan, totalScans, syncedScans } = useSyncStore();
+  const { isOnline, setOnline } = useSyncStore();
   const { soundEnabled, vibrationEnabled } = useSettingsStore();
+
+  // Sync stats from the new sync module
+  const [pendingCount, setPendingCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Check if we've previously granted permission (persisted in sessionStorage)
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(() => {
@@ -40,8 +44,26 @@ export const ScannerPage: React.FC = () => {
 
   const eventId = eventDetails?.event_id;
 
-  const syncPercentage =
-    totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
+  // Calculate sync percentage from the new sync module
+  const syncPercentage = totalCount > 0 ? Math.round(((totalCount - pendingCount) / totalCount) * 100) : 100;
+
+  // Refresh sync stats from IndexedDB
+  const refreshSyncStats = useCallback(async () => {
+    try {
+      const queueStats = await getStats();
+      setPendingCount(queueStats.pending_scans);
+      setTotalCount(queueStats.total_scans);
+    } catch (err) {
+      console.error('[ScannerPage] Failed to get sync stats:', err);
+    }
+  }, []);
+
+  // Refresh stats periodically and on mount
+  useEffect(() => {
+    refreshSyncStats();
+    const interval = setInterval(refreshSyncStats, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, [refreshSyncStats]);
 
   // Start auto-sync when scanner page mounts
   useEffect(() => {
@@ -192,7 +214,7 @@ export const ScannerPage: React.FC = () => {
               message = 'Offline validated';
               ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
               db.markAsScanned(qrCode, deviceId).catch(console.error);
-              addPendingScan({ qrCode, deviceId, scannedAt: Date.now() });
+              // Note: Scan will be queued for sync later with all scans
             }
           } else {
             playSound('failure');
@@ -251,12 +273,15 @@ export const ScannerPage: React.FC = () => {
         gateName: gateName || undefined,
         ticketTypes: selectedTicketTypes.length > 0 ? selectedTicketTypes : undefined,
       }).then(() => {
-        console.log('[ScannerPage] Scan queued, checking if can sync:', { online: navigator.onLine, canSync: canSync() });
+        console.log('[ScannerPage] Scan queued, refreshing stats...');
+        refreshSyncStats(); // Update pending count immediately
+        
         // Immediately sync to server if online
         if (navigator.onLine && canSync()) {
           console.log('[ScannerPage] Starting sync...');
           syncAll(eventId, gateName || undefined).then(result => {
             console.log('[ScannerPage] Sync result:', result);
+            refreshSyncStats(); // Update stats after sync completes
           }).catch(err => 
             console.error('[ScannerPage] Background sync failed:', err)
           );
@@ -268,7 +293,7 @@ export const ScannerPage: React.FC = () => {
         isProcessingRef.current = false;
       }, 300);
     },
-    [eventId, deviceId, gateName, selectedTicketTypes, isOnline, toast, vibrate, playSound, addScanResult, addPendingScan]
+    [eventId, deviceId, gateName, selectedTicketTypes, isOnline, toast, vibrate, playSound, addScanResult, refreshSyncStats]
   );
 
   const handleDismissResult = useCallback(() => {
@@ -290,20 +315,38 @@ export const ScannerPage: React.FC = () => {
     setShowManualEntry(false);
   }, [manualCode, handleScan, toast]);
 
-  // Setup online/offline listener
+  // Setup online/offline listener - sync when coming back online
   useEffect(() => {
-    const updateOnlineStatus = () => {
-      useSyncStore.getState().setOnline(navigator.onLine);
+    const handleOnline = () => {
+      console.log('[ScannerPage] Device came online, triggering sync...');
+      setOnline(true);
+      // Trigger sync after a short delay to ensure connection is stable
+      if (eventId) {
+        setTimeout(() => {
+          console.log('[ScannerPage] Starting sync after coming online...');
+          syncAll(eventId, gateName || undefined)
+            .then(result => {
+              console.log('[ScannerPage] Online sync result:', result);
+              refreshSyncStats(); // Refresh stats after sync
+            })
+            .catch(err => console.error('[ScannerPage] Online sync failed:', err));
+        }, 1000);
+      }
     };
 
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
+    const handleOffline = () => {
+      console.log('[ScannerPage] Device went offline');
+      setOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     return () => {
-      window.removeEventListener('online', updateOnlineStatus);
-      window.removeEventListener('offline', updateOnlineStatus);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [eventId, gateName, setOnline, refreshSyncStats]);
 
   // Handle camera permission granted
   const handlePermissionGranted = useCallback(() => {
