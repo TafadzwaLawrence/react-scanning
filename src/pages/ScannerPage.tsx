@@ -147,9 +147,13 @@ export const ScannerPage: React.FC = () => {
       let resultType: ScanResultType = 'error';
       let message = '';
       let ticket: ScanResult['ticket'];
+      let wasOfflineValidation = false; // Track if this was an offline validation
+      
+      // Use navigator.onLine directly for real-time online check
+      const currentlyOnline = navigator.onLine;
 
       try {
-        if (isOnline) {
+        if (currentlyOnline) {
           const response: VerifyResponse = await ticketsAPI.verify(
             eventId,
             qrCode,
@@ -214,7 +218,7 @@ export const ScannerPage: React.FC = () => {
               message = 'Offline validated';
               ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
               db.markAsScanned(qrCode, deviceId).catch(console.error);
-              // Note: Scan will be queued for sync later with all scans
+              wasOfflineValidation = true; // Mark for sync queue
             }
           } else {
             playSound('failure');
@@ -224,10 +228,54 @@ export const ScannerPage: React.FC = () => {
           }
         }
       } catch (err) {
-        playSound('failure');
-        vibrate([50, 30, 50]);
+        // Check if this is a network error - if so, fallback to offline validation
+        const isNetworkError = err instanceof AxiosError && !err.response;
         
-        if (err instanceof AxiosError && err.response?.data) {
+        if (isNetworkError) {
+          // Network error - try offline validation
+          console.log('[ScannerPage] Network error, falling back to offline validation');
+          setOnline(false); // Update online state
+          
+          try {
+            const localTicket = await db.getTicketByQRCode(qrCode);
+            if (localTicket) {
+              if (localTicket.log_count > 0) {
+                playSound('warning');
+                vibrate([50, 30, 50]);
+                resultType = 'used';
+                message = 'Already scanned';
+                ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
+              } else if (selectedTicketTypes.length > 0 && !selectedTicketTypes.includes(localTicket.ticket_type)) {
+                playSound('failure');
+                vibrate([50, 30, 50]);
+                resultType = 'wrong-type';
+                message = `Type: ${localTicket.ticket_type}`;
+              } else {
+                playSound('success');
+                vibrate(100);
+                resultType = 'valid';
+                message = 'Offline validated';
+                ticket = { type: localTicket.ticket_type, admittence: localTicket.ticket_admittence, number: localTicket.ticket_number };
+                db.markAsScanned(qrCode, deviceId).catch(console.error);
+                wasOfflineValidation = true; // Mark for sync queue
+              }
+            } else {
+              playSound('failure');
+              vibrate([50, 30, 50]);
+              resultType = 'invalid';
+              message = 'Not in database';
+            }
+          } catch (offlineErr) {
+            console.error('[ScannerPage] Offline validation failed:', offlineErr);
+            playSound('failure');
+            vibrate([50, 30, 50]);
+            resultType = 'error';
+            message = 'Offline error';
+          }
+        } else if (err instanceof AxiosError && err.response?.data) {
+          playSound('failure');
+          vibrate([50, 30, 50]);
+          
           const errorData = err.response.data as VerifyResponse;
           if (err.response.status === 404 || errorData.status === 404) {
             resultType = 'invalid';
@@ -249,6 +297,8 @@ export const ScannerPage: React.FC = () => {
             message = (errorData as any).message || 'Error';
           }
         } else {
+          playSound('failure');
+          vibrate([50, 30, 50]);
           resultType = 'error';
           message = 'Network error';
         }
@@ -264,36 +314,39 @@ export const ScannerPage: React.FC = () => {
         requiredTypes: selectedTicketTypes,
       });
 
-      // Log ALL scans to sync queue for device_scan_logs tracking
-      // This ensures every scan attempt is recorded on the server
-      console.log('[ScannerPage] Adding scan to sync queue:', { qrCode, eventId, gateName });
-      addToSyncQueue({
-        qrcode: qrCode,
-        eventId: eventId,
-        gateName: gateName || undefined,
-        ticketTypes: selectedTicketTypes.length > 0 ? selectedTicketTypes : undefined,
-      }).then(() => {
-        console.log('[ScannerPage] Scan queued, refreshing stats...');
-        refreshSyncStats(); // Update pending count immediately
-        
-        // Immediately sync to server if online
-        if (navigator.onLine && canSync()) {
-          console.log('[ScannerPage] Starting sync...');
-          syncAll(eventId, gateName || undefined).then(result => {
-            console.log('[ScannerPage] Sync result:', result);
-            refreshSyncStats(); // Update stats after sync completes
-          }).catch(err => 
-            console.error('[ScannerPage] Background sync failed:', err)
-          );
-        }
-      }).catch(err => console.error('[ScannerPage] Failed to queue scan for sync:', err));
+      // Only queue VALID OFFLINE scans for sync
+      // Online scans are already verified with the API, no need to sync
+      if (wasOfflineValidation && resultType === 'valid') {
+        console.log('[ScannerPage] Adding offline scan to sync queue:', { qrCode, eventId, deviceId, gateName });
+        addToSyncQueue({
+          qrcode: qrCode,
+          eventId: eventId,
+          deviceId: deviceId, // Pass the device ID from authStore
+          gateName: gateName || undefined,
+          ticketTypes: selectedTicketTypes.length > 0 ? selectedTicketTypes : undefined,
+        }).then(() => {
+          console.log('[ScannerPage] Offline scan queued, refreshing stats...');
+          refreshSyncStats(); // Update pending count immediately
+          
+          // Try to sync immediately if we're back online
+          if (navigator.onLine && canSync()) {
+            console.log('[ScannerPage] Starting sync...');
+            syncAll(eventId, gateName || undefined).then(result => {
+              console.log('[ScannerPage] Sync result:', result);
+              refreshSyncStats(); // Update stats after sync completes
+            }).catch(err => 
+              console.error('[ScannerPage] Background sync failed:', err)
+            );
+          }
+        }).catch(err => console.error('[ScannerPage] Failed to queue scan for sync:', err));
+      }
 
       // Release lock after short delay
       setTimeout(() => {
         isProcessingRef.current = false;
       }, 300);
     },
-    [eventId, deviceId, gateName, selectedTicketTypes, isOnline, toast, vibrate, playSound, addScanResult, refreshSyncStats]
+    [eventId, deviceId, gateName, selectedTicketTypes, isOnline, toast, vibrate, playSound, addScanResult, refreshSyncStats, setOnline]
   );
 
   const handleDismissResult = useCallback(() => {

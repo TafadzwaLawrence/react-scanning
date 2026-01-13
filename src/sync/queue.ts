@@ -38,6 +38,7 @@ const db = new SyncDatabase();
 export async function addPendingScan(params: {
   qrcode: string;
   eventId: string;
+  deviceId: string; // Device ID from authStore
   ticketTypes?: string[];
   gateName?: string;
 }): Promise<PendingScan> {
@@ -46,7 +47,7 @@ export async function addPendingScan(params: {
   const scan: PendingScan = {
     id: generateUUID(),
     qrcode: params.qrcode,
-    device_id: getDeviceId(),
+    device_id: params.deviceId, // Use the deviceId passed from authStore
     event_id: params.eventId,
     scanned_at: Date.now(),
     ticket_types: params.ticketTypes,

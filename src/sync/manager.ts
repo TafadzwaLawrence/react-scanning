@@ -457,6 +457,7 @@ export async function importData(
         await addPendingScan({
           qrcode: scan.qrcode,
           eventId: scan.event_id,
+          deviceId: scan.device_id, // Include device_id from exported data
           ticketTypes: scan.ticket_types,
           gateName: scan.gate_name,
         });

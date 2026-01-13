@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Skeleton } from '@/components/ui';
 import { useAuthStore, useEventStore, useSyncStore } from '@/stores';
 import { useStatusBarColor, STATUS_BAR_COLORS } from '@/hooks';
 import { db } from '@/services/db';
+import { getStats } from '@/sync';
 import { format } from 'date-fns';
 import {
   BarChart,
@@ -22,13 +23,28 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { eventDetails, deviceId, gateName } = useAuthStore();
   const { selectedTicketTypes } = useEventStore();
-  const { lastSyncTime, totalScans, syncedScans } = useSyncStore();
+  const { lastSyncTime } = useSyncStore();
 
   const [isLoading, setIsLoading] = useState(true);
   const [totalTickets, setTotalTickets] = useState(0);
   const [scannedCount, setScannedCount] = useState(0);
   const [unsyncedCount, setUnsyncedCount] = useState(0);
   const [hourlyData, setHourlyData] = useState<HourlyScanData[]>([]);
+  
+  // Sync stats from new sync module
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
+  const [totalSyncScans, setTotalSyncScans] = useState(0);
+
+  // Refresh sync stats from new sync module
+  const refreshSyncStats = useCallback(async () => {
+    try {
+      const syncStats = await getStats();
+      setPendingSyncCount(syncStats.pending_scans);
+      setTotalSyncScans(syncStats.total_scans);
+    } catch (err) {
+      console.error('Error loading sync stats:', err);
+    }
+  }, []);
 
   useEffect(() => {
     const loadStats = async () => {
@@ -42,6 +58,9 @@ export const DashboardPage: React.FC = () => {
         setScannedCount(scanned);
         setUnsyncedCount(unsynced);
         setHourlyData(hourly);
+        
+        // Also refresh sync stats
+        await refreshSyncStats();
       } catch (err) {
         console.error('Error loading stats:', err);
       } finally {
@@ -54,10 +73,11 @@ export const DashboardPage: React.FC = () => {
     // Refresh stats every 10 seconds
     const interval = setInterval(loadStats, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshSyncStats]);
 
+  // Sync percentage: (total - pending) / total = synced percentage
   const syncPercentage =
-    totalScans > 0 ? Math.round((syncedScans / totalScans) * 100) : 100;
+    totalSyncScans > 0 ? Math.round(((totalSyncScans - pendingSyncCount) / totalSyncScans) * 100) : 100;
   
   const scannedPercentage = totalTickets > 0 ? Math.round((scannedCount / totalTickets) * 100) : 0;
 
