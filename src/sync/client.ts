@@ -193,6 +193,8 @@ export class SyncClient {
       })),
     };
 
+    console.log('[SyncClient] syncBatch called:', { url: `${this.baseUrl}/sync/scans`, payload });
+
     let lastError: string | undefined;
 
     for (let attempt = 0; attempt < this.config.retry_attempts; attempt++) {

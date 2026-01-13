@@ -244,15 +244,20 @@ export const ScannerPage: React.FC = () => {
 
       // Log ALL scans to sync queue for device_scan_logs tracking
       // This ensures every scan attempt is recorded on the server
+      console.log('[ScannerPage] Adding scan to sync queue:', { qrCode, eventId, gateName });
       addToSyncQueue({
         qrcode: qrCode,
         eventId: eventId,
         gateName: gateName || undefined,
         ticketTypes: selectedTicketTypes.length > 0 ? selectedTicketTypes : undefined,
       }).then(() => {
+        console.log('[ScannerPage] Scan queued, checking if can sync:', { online: navigator.onLine, canSync: canSync() });
         // Immediately sync to server if online
         if (navigator.onLine && canSync()) {
-          syncAll(eventId, gateName || undefined).catch(err => 
+          console.log('[ScannerPage] Starting sync...');
+          syncAll(eventId, gateName || undefined).then(result => {
+            console.log('[ScannerPage] Sync result:', result);
+          }).catch(err => 
             console.error('[ScannerPage] Background sync failed:', err)
           );
         }

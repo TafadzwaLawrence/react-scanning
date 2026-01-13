@@ -41,6 +41,8 @@ export async function addPendingScan(params: {
   ticketTypes?: string[];
   gateName?: string;
 }): Promise<PendingScan> {
+  console.log('[SyncQueue] addPendingScan called:', params);
+  
   const scan: PendingScan = {
     id: generateUUID(),
     qrcode: params.qrcode,
@@ -55,6 +57,7 @@ export async function addPendingScan(params: {
   };
 
   await db.pendingScans.add(scan);
+  console.log('[SyncQueue] Scan added to queue:', scan);
   return scan;
 }
 
@@ -62,14 +65,16 @@ export async function addPendingScan(params: {
  * Get all pending (unsynced) scans
  */
 export async function getPendingScans(eventId?: string): Promise<PendingScan[]> {
-  let query = db.pendingScans.where('synced').equals(0); // 0 = false in IndexedDB
+  // Get all scans and filter by synced status
+  const allScans = await db.pendingScans.toArray();
+  const pendingScans = allScans.filter(s => !s.synced);
   
-  const scans = await query.toArray();
+  console.log('[SyncQueue] getPendingScans:', { total: allScans.length, pending: pendingScans.length, eventId });
   
   if (eventId) {
-    return scans.filter(s => s.event_id === eventId);
+    return pendingScans.filter(s => s.event_id === eventId);
   }
-  return scans;
+  return pendingScans;
 }
 
 /**

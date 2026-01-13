@@ -140,11 +140,15 @@ export async function syncAll(
   failed: number;
   results: ScanSyncResult[];
 }> {
+  console.log('[SyncManager] syncAll called:', { eventId, gateName, isSyncing: syncState.isSyncing });
+  
   if (syncState.isSyncing) {
+    console.log('[SyncManager] Already syncing, skipping');
     return { success: false, synced: 0, failed: 0, results: [] };
   }
 
   if (!isSyncClientInitialized()) {
+    console.error('[SyncManager] Sync not initialized');
     throw new Error('Sync not initialized. Call initSync first.');
   }
 
@@ -152,6 +156,7 @@ export async function syncAll(
 
   // Check connectivity
   if (!navigator.onLine) {
+    console.log('[SyncManager] Offline, skipping sync');
     syncState.error = 'No internet connection';
     notifyListeners();
     return { success: false, synced: 0, failed: 0, results: [] };
@@ -171,8 +176,10 @@ export async function syncAll(
   try {
     // Get pending scans
     const pendingScans = await getPendingScans(eventId);
+    console.log('[SyncManager] Pending scans:', pendingScans.length, pendingScans);
 
     if (pendingScans.length === 0) {
+      console.log('[SyncManager] No pending scans to sync');
       syncState.progress = {
         total: 0,
         current: 0,
@@ -188,6 +195,7 @@ export async function syncAll(
       return { success: true, synced: 0, failed: 0, results: [] };
     }
 
+    console.log('[SyncManager] Starting sync of', pendingScans.length, 'scans');
     syncState.progress = {
       total: pendingScans.length,
       current: 0,
