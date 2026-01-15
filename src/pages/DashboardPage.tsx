@@ -28,7 +28,6 @@ export const DashboardPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [totalTickets, setTotalTickets] = useState(0);
   const [scannedCount, setScannedCount] = useState(0);
-  const [unsyncedCount, setUnsyncedCount] = useState(0);
   const [hourlyData, setHourlyData] = useState<HourlyScanData[]>([]);
   
   // Sync stats from new sync module
@@ -51,12 +50,10 @@ export const DashboardPage: React.FC = () => {
       try {
         const total = await db.countAllTickets();
         const scanned = await db.getScannedCount();
-        const unsynced = await db.getUnsyncedCount();
         const hourly = await db.getHourlyScanData();
 
         setTotalTickets(total);
         setScannedCount(scanned);
-        setUnsyncedCount(unsynced);
         setHourlyData(hourly);
         
         // Also refresh sync stats
@@ -193,7 +190,7 @@ export const DashboardPage: React.FC = () => {
               <p className="text-xs text-text-secondary">Scanned</p>
             </div>
             <div className="bg-muted rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-warning">{unsyncedCount}</p>
+              <p className="text-2xl font-bold text-warning">{pendingSyncCount}</p>
               <p className="text-xs text-text-secondary">Pending</p>
             </div>
             <div className="bg-muted rounded-xl p-3 text-center">
